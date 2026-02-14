@@ -101,6 +101,23 @@ Los muebles en la biblioteca del panel derecho son arrastrables. Se pueden arras
 
 Doble click en cualquier bloque abre un campo de texto superpuesto para editar el nombre directamente en el plano, sin necesidad de usar el panel de propiedades. El input se posiciona sobre el texto del bloque usando coordenadas de pantalla calculadas desde las coordenadas SVG.
 
+### Capas (Layers)
+
+Sistema de capas para ocultar/mostrar grupos de elementos del plano:
+- **Habitaciones**: rooms y perimetro
+- **Paredes**: muros y tabiques
+- **Puertas/Ventanas**: puertas y ventanas
+- **Muebles**: todo el mobiliario
+- **Textos**: etiquetas libres
+- **Cotas**: dimensiones automaticas
+- **Escala**: barra de escala grafica
+
+Panel "Capas" en el sidebar derecho con checkboxes individuales. El estado se reaplica despues de undo/redo.
+
+### Paredes Inteligentes
+
+Al redimensionar una habitacion, si otra habitacion comparte el borde que se esta moviendo (threshold 5px), la habitacion adyacente se redimensiona automaticamente. Funciona en las 4 direcciones (norte, sur, este, oeste). Las posiciones originales de las habitaciones adyacentes se almacenan en `S.rszAdj[]` al iniciar el resize.
+
 ### Persistencia
 
 - `localStorage` con clave `plano-v4`
@@ -144,9 +161,23 @@ Doble click en cualquier bloque abre un campo de texto superpuesto para editar e
 
 ### Panel Derecho
 
+- **Capas**: Toggles para ocultar/mostrar cada tipo de elemento.
+- **Areas**: Lista de habitaciones con area individual y total automatico.
 - **Propiedades**: Ancho, alto, area en metros. Posicion X/Y editable. Color de relleno. Nombre editable.
-- **Biblioteca de muebles**: Sofa, mesa, cama, inodoro, ducha, lavabo, estufa, nevera. Arrastrables directamente al canvas.
+- **Biblioteca de muebles**: 18 muebles organizados en 5 categorias. Arrastrables directamente al canvas.
 - **Colores rapidos**: Paleta de 16 colores para aplicar al elemento seleccionado.
+
+### Biblioteca de Muebles (por categoria)
+
+| Categoria   | Muebles                                    |
+|------------ |------------------------------------------- |
+| Sala        | Sofa, Mesa, Silla, TV                      |
+| Dormitorio  | Cama, Armario, Mesa de noche, Escritorio   |
+| Baño        | Inodoro, Ducha, Lavabo, Bañera             |
+| Cocina      | Estufa, Nevera, Lavadora                   |
+| Simbolos    | Escalera, Columna, Flecha Norte            |
+
+Cada mueble tiene forma SVG real (paths/ellipses/circles) en vez de solo rectangulos. Las categorias son colapsables.
 
 ### Menu Contextual (Click derecho)
 
@@ -165,7 +196,16 @@ Doble click en cualquier bloque abre un campo de texto superpuesto para editar e
 
 ## Historial de Versiones
 
-### v4 (actual)
+### v5 (actual)
+- Capas (layers) con toggles por tipo de elemento
+- Paredes inteligentes: redimensionar una habitacion ajusta las adyacentes
+- 10 nuevos muebles: silla, TV, escritorio, armario, mesa de noche, lavadora, bañera, escalera, columna, flecha norte
+- Biblioteca categorizada: Sala, Dormitorio, Baño, Cocina, Simbolos (colapsables)
+- Formas SVG reales para todos los muebles
+- Calculo automatico de area total por habitacion
+- Escala grafica visual con regla dibujada
+
+### v4
 - Multi-seleccion con Shift+click y lasso
 - Rotacion de elementos con handle circular y tecla R
 - Snap a paredes para puertas y ventanas
@@ -199,17 +239,17 @@ Doble click en cualquier bloque abre un campo de texto superpuesto para editar e
 
 ### Prioridad Alta - Arquitectura
 
-- [ ] **Capas** (layers) - ocultar/mostrar grupos (estructura, muebles, cotas)
-- [ ] **Paredes inteligentes** - mover pared compartida redimensiona ambas habitaciones
-- [ ] **Calculo automatico de area total** sumando habitaciones
-- [ ] **Escala grafica** visual en el plano (regla dibujada)
+- [x] **Capas** (layers) - ocultar/mostrar grupos (estructura, muebles, cotas)
+- [x] **Paredes inteligentes** - mover pared compartida redimensiona ambas habitaciones
+- [x] **Calculo automatico de area total** sumando habitaciones
+- [x] **Escala grafica** visual en el plano (regla dibujada)
 
 ### Prioridad Media - Biblioteca
 
-- [ ] **Mas muebles** - escritorio, silla, TV, lavadora, banera, armario, mesa de noche
-- [ ] **Formas SVG reales** en vez de solo rectangulos con texto
-- [ ] **Categorias** en la biblioteca (bano, cocina, dormitorio, sala)
-- [ ] **Simbolos arquitectonicos** correctos (escaleras, cortes, etc.)
+- [x] **Mas muebles** - escritorio, silla, TV, lavadora, banera, armario, mesa de noche
+- [x] **Formas SVG reales** en vez de solo rectangulos con texto
+- [x] **Categorias** en la biblioteca (bano, cocina, dormitorio, sala)
+- [x] **Simbolos arquitectonicos** correctos (escaleras, columna, flecha norte)
 
 ### Prioridad Media - Exportacion
 
