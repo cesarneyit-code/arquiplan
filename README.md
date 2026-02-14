@@ -26,11 +26,13 @@ arquiplan/
 Cada elemento del plano es un `<g>` SVG que contiene todos sus sub-elementos (rectangulo, texto, decoraciones). Mover el grupo mueve todo junto, eliminando desalineaciones.
 
 ```
-<g class="room-block" data-type="room" data-name="Cocina" transform="translate(550,750)">
+<g class="room-block" data-type="room" data-name="Cocina" data-rot="0" transform="translate(550,750)">
   <rect width="200" height="180" fill="#ffebee" .../>    <!-- rectangulo -->
   <text class="room-label" x="100" y="90">Cocina</text>  <!-- nombre centrado -->
 </g>
 ```
+
+El atributo `data-rot` almacena el angulo de rotacion del bloque. Cuando es distinto de 0, el transform incluye `rotate(deg, cx, cy)` centrado en el bloque.
 
 ### Funciones Factory
 
@@ -66,15 +68,46 @@ selG     -> Handles de seleccion y redimensionado
 
 ### Smart Snap
 
-Compara bordes (left, right, top, bottom, center) del bloque arrastrado contra todos los demas. Si un borde esta a menos de 8px de otro, lo alinea y muestra guia verde.
+Compara bordes (left, right, top, bottom, center) del bloque arrastrado contra todos los demas. Si un borde esta a menos de 8px de otro, lo alinea y muestra guia verde. Excluye todos los bloques seleccionados de los objetivos de snap.
+
+Para puertas y ventanas, ademas aplica **Wall Snap**: detecta si el bloque esta cerca del borde de una habitacion (threshold 15px) y lo adhiere automaticamente al borde mas cercano.
+
+### Sistema de Seleccion (v4)
+
+- **Seleccion simple**: Click en un bloque lo selecciona
+- **Multi-seleccion**: Shift+click agrega/quita bloques de la seleccion
+- **Lasso**: Click y arrastrar en area vacia dibuja un rectangulo de seleccion; todos los bloques que intersectan se seleccionan
+- **Estado**: `S.sels[]` array de elementos seleccionados. `S.sel` es getter de conveniencia que retorna `S.sels[0]`
+- **Bounding box**: Cuando hay multiples seleccionados, se muestra un bounding box combinado con borde azul discontinuo
+
+### Sistema de Rotacion (v4)
+
+- **Handle circular**: Al seleccionar un bloque aparece un circulo verde arriba del bloque. Arrastrar el handle rota el bloque
+- **Tecla R**: Rota 90 grados el bloque seleccionado (si no hay seleccion, activa la herramienta de habitacion)
+- **Menu contextual**: Opcion "Rotar 90" disponible al hacer click derecho
+- **Almacenamiento**: Angulo guardado en atributo `data-rot`, persistido via `blocksG.innerHTML`
+
+### Clipboard (v4)
+
+- **Ctrl+C**: Copia los bloques seleccionados (clona los nodos)
+- **Ctrl+V**: Pega los bloques copiados con un offset de 20px para evitar superposicion
+- Compatible con multi-seleccion (copia/pega todos los seleccionados)
+
+### Drag & Drop (v4)
+
+Los muebles en la biblioteca del panel derecho son arrastrables. Se pueden arrastrar directamente al canvas del plano usando HTML5 Drag & Drop API. El mueble se coloca en la posicion exacta donde se suelta.
+
+### Edicion Inline (v4)
+
+Doble click en cualquier bloque abre un campo de texto superpuesto para editar el nombre directamente en el plano, sin necesidad de usar el panel de propiedades. El input se posiciona sobre el texto del bloque usando coordenadas de pantalla calculadas desde las coordenadas SVG.
 
 ### Persistencia
 
-- `localStorage` con clave `plano-v3`
+- `localStorage` con clave `plano-v4`
 - Guarda: `blocksG.innerHTML` + escala (WM, HM)
 - Boton "Reset" para volver al plano original
 
-## Funcionalidades Actuales (v3)
+## Funcionalidades Actuales (v4)
 
 ### Herramientas (Atajos)
 
@@ -82,7 +115,7 @@ Compara bordes (left, right, top, bottom, center) del bloque arrastrado contra t
 |------ |------------ |------------------------------------- |
 | V     | Seleccionar | Click para seleccionar, arrastrar para mover |
 | H     | Mover vista | Pan del canvas (tambien Alt+click o boton central) |
-| R     | Habitacion  | Dibujar rectangulo de habitacion     |
+| R     | Habitacion / Rotar | Sin seleccion: dibujar habitacion. Con seleccion: rotar 90 grados |
 | W     | Pared       | Dibujar pared con tramado            |
 | D     | Puerta      | Dibujar puerta con arco              |
 | N     | Ventana     | Dibujar ventana                      |
@@ -92,22 +125,36 @@ Compara bordes (left, right, top, bottom, center) del bloque arrastrado contra t
 
 ### Atajos Globales
 
-| Atajo       | Accion              |
-|------------ |-------------------- |
-| Ctrl+Z      | Deshacer            |
-| Ctrl+Y      | Rehacer             |
-| Ctrl+D      | Duplicar seleccion  |
-| Delete      | Eliminar seleccion  |
-| Escape      | Deseleccionar       |
-| Scroll      | Zoom in/out         |
-| Alt+Click   | Pan del canvas      |
-| Click der.  | Menu contextual     |
+| Atajo         | Accion                        |
+|-------------- |------------------------------ |
+| Ctrl+Z        | Deshacer                      |
+| Ctrl+Y        | Rehacer                       |
+| Ctrl+C        | Copiar seleccion al clipboard |
+| Ctrl+V        | Pegar desde clipboard         |
+| Ctrl+D        | Duplicar seleccion            |
+| R             | Rotar seleccion 90 grados     |
+| Shift+Click   | Agregar/quitar de seleccion   |
+| Doble click   | Editar nombre inline          |
+| Delete        | Eliminar seleccion            |
+| Escape        | Deseleccionar                 |
+| Scroll        | Zoom in/out                   |
+| Alt+Click     | Pan del canvas                |
+| Click der.    | Menu contextual               |
+| Drag (vacio)  | Lasso de seleccion            |
 
 ### Panel Derecho
 
 - **Propiedades**: Ancho, alto, area en metros. Posicion X/Y editable. Color de relleno. Nombre editable.
-- **Biblioteca de muebles**: Sofa, mesa, cama, inodoro, ducha, lavabo, estufa, nevera.
+- **Biblioteca de muebles**: Sofa, mesa, cama, inodoro, ducha, lavabo, estufa, nevera. Arrastrables directamente al canvas.
 - **Colores rapidos**: Paleta de 16 colores para aplicar al elemento seleccionado.
+
+### Menu Contextual (Click derecho)
+
+- Traer al frente
+- Enviar atras
+- Duplicar (Ctrl+D)
+- Rotar 90 grados
+- Eliminar (Del)
 
 ### Exportacion
 
@@ -116,16 +163,38 @@ Compara bordes (left, right, top, bottom, center) del bloque arrastrado contra t
 
 ---
 
+## Historial de Versiones
+
+### v4 (actual)
+- Multi-seleccion con Shift+click y lasso
+- Rotacion de elementos con handle circular y tecla R
+- Snap a paredes para puertas y ventanas
+- Copy/Paste (Ctrl+C/V)
+- Drag & drop real desde la biblioteca de muebles
+- Edicion inline con doble click
+
+### v3
+- Arquitectura de bloques agrupados (`<g>`)
+- Smart snap con guias verdes
+- Biblioteca de muebles (8 tipos)
+- Panel de propiedades con medidas en metros
+- Exportacion SVG/PNG
+- Undo/Redo (60 estados)
+- Menu contextual
+- Dark theme UI
+
+---
+
 ## Mejoras Planificadas
 
 ### Prioridad Alta - Interaccion
 
-- [ ] **Multi-seleccion** - Shift+click o lasso para seleccionar varios bloques
-- [ ] **Rotacion** de elementos con handle circular o tecla R
-- [ ] **Snap a paredes** - puertas y ventanas se adhieren al borde de habitaciones
-- [ ] **Copy/Paste** (Ctrl+C/V)
-- [ ] **Drag & drop** real desde la biblioteca de muebles
-- [ ] **Edicion inline** - doble click en texto para editar sin modal
+- [x] **Multi-seleccion** - Shift+click o lasso para seleccionar varios bloques
+- [x] **Rotacion** de elementos con handle circular o tecla R
+- [x] **Snap a paredes** - puertas y ventanas se adhieren al borde de habitaciones
+- [x] **Copy/Paste** (Ctrl+C/V)
+- [x] **Drag & drop** real desde la biblioteca de muebles
+- [x] **Edicion inline** - doble click en texto para editar sin modal
 - [ ] **Restriccion de movimiento** - Shift para mover solo en X o solo en Y
 
 ### Prioridad Alta - Arquitectura
@@ -191,5 +260,8 @@ Elementos adicionales: 1 muro closet, 4 ventanas, 1 puerta entrada, 1 isla de co
 - **Todo en un archivo**: La app es un solo HTML con CSS y JS embebido. No requiere build, bundler, ni servidor.
 - **Sin dependencias**: Cero librerias externas. SVG nativo + vanilla JS.
 - **Undo/Redo**: Guarda snapshots de `blocksG.innerHTML` (max 60 estados).
+- **Multi-seleccion**: `S.sels[]` array con getter `S.sel` para compatibilidad hacia atras.
+- **Rotacion**: Atributo `data-rot` en cada `<g>`, aplicado como `rotate()` en el transform SVG.
+- **Wall Snap**: Puertas y ventanas detectan bordes de habitaciones cercanas (15px) y se adhieren.
 - **Rendimiento**: Para planos grandes considerar virtualizar la grilla y limitar snap a elementos cercanos.
 - **Navegador**: Probado en Chrome/Safari. Requiere ES6+.
