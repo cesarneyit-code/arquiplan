@@ -102,6 +102,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .dim-g text{fill:var(--pink);font-size:12px;font-weight:700;text-anchor:middle;font-family:Inter,Arial,sans-serif}
 .dim-g rect.dbg{fill:#f8f6f1;rx:3}
 .room-tile{pointer-events:none;opacity:.6}
+select.pin{padding:5px 7px;background:var(--bg0);border:1px solid var(--brd);border-radius:4px;color:var(--txt);font-size:11px;width:100%}
+.room-poly{transition:stroke .1s,stroke-width .1s}
+.room-block:hover .room-poly{stroke-width:5;stroke:var(--acc)}
 .live-t{fill:var(--ylw);font-size:13px;font-weight:700;text-anchor:middle;pointer-events:none;font-family:Inter,Arial,sans-serif}
 .grid-maj{stroke:#1e1e3a;stroke-width:.8}
 .grid-min{stroke:#15152a;stroke-width:.4}
@@ -755,6 +758,127 @@ function gMainRect(g){return g.querySelector('rect')}
 function sa(el,o){for(const[k,v]of Object.entries(o))el.setAttribute(k,String(v))}
 function rangesOverlap(a1,a2,b1,b2){return a1<b2&&a2>b1}
 
+// Z-Order layer priority
+const Z_ORDER={boundary:0,room:1,wall:2,door:3,window:3,furniture:4,label:5,dimension:5,custom:5};
+function insertByLayer(g){
+  const myZ=Z_ORDER[g.getAttribute('data-type')]??5;
+  const kids=[...blocksG.children];
+  for(let i=kids.length-1;i>=0;i--){
+    const cz=Z_ORDER[kids[i].getAttribute('data-type')]??5;
+    if(cz<=myZ){blocksG.insertBefore(g,kids[i].nextSibling);return}
+  }
+  blocksG.insertBefore(g,blocksG.firstChild);
+}
+function sortBlocksZ(){
+  const kids=[...blocksG.children];
+  kids.sort((a,b)=>(Z_ORDER[a.getAttribute('data-type')]??5)-(Z_ORDER[b.getAttribute('data-type')]??5));
+  kids.forEach(k=>blocksG.appendChild(k));
+}
+
+// Shape presets (normalized 0-1 vertices, scaled to bounding rect)
+const SHAPE_PRESETS={
+  'rect':null,
+  'L-tl':[[0,0],[.5,0],[.5,.5],[1,.5],[1,1],[0,1]],
+  'L-tr':[[0,0],[1,0],[1,1],[.5,1],[.5,.5],[0,.5]],
+  'L-bl':[[0,0],[1,0],[1,.5],[.5,.5],[.5,1],[0,1]],
+  'L-br':[[0,.5],[.5,.5],[.5,0],[1,0],[1,1],[0,1]],
+  'U':[[0,0],[1,0],[1,1],[.75,1],[.75,.35],[.25,.35],[.25,1],[0,1]],
+  'T':[[0,0],[1,0],[1,.35],[.75,.35],[.75,1],[.25,1],[.25,.35],[0,.35]]
+};
+const SHAPE_LABELS={'rect':'\u25ad','L-tl':'L\u2196','L-tr':'L\u2197','L-bl':'L\u2199','L-br':'L\u2198','U':'U','T':'T'};
+
+function polyPoints(g){
+  const d=g.getAttribute('data-poly');
+  if(!d)return null;
+  return d.trim().split(/\s+/).map(p=>{const[x,y]=p.split(',');return[+x,+y]});
+}
+function polyArea(pts){
+  let a=0;
+  for(let i=0,n=pts.length;i<n;i++){const j=(i+1)%n;a+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1]}
+  return Math.abs(a)/2;
+}
+function polyCentroid(pts){
+  let cx=0,cy=0,a=0;
+  for(let i=0,n=pts.length;i<n;i++){
+    const j=(i+1)%n;const cross=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];
+    cx+=(pts[i][0]+pts[j][0])*cross;cy+=(pts[i][1]+pts[j][1])*cross;a+=cross;
+  }
+  a/=2;if(Math.abs(a)<0.001)return{x:pts[0][0],y:pts[0][1]};
+  return{x:cx/(6*a),y:cy/(6*a)};
+}
+function updateRoomPoly(g){
+  const pts=polyPoints(g);if(!pts)return;
+  const pointsStr=pts.map(p=>p.join(',')).join(' ');
+  const mr=gMainRect(g);if(!mr)return;
+  // Create or update room-poly
+  let poly=g.querySelector('.room-poly');
+  if(!poly){
+    poly=ce('polygon');poly.setAttribute('class','room-poly');
+    poly.setAttribute('fill',mr.getAttribute('fill')||'#f5f2ed');
+    poly.setAttribute('stroke',mr.getAttribute('stroke')||'#3a3a3a');
+    poly.setAttribute('stroke-width',mr.getAttribute('stroke-width')||'3.5');
+    const flt=mr.getAttribute('filter');if(flt)poly.setAttribute('filter',flt);
+    mr.setAttribute('fill','none');mr.setAttribute('stroke','none');mr.removeAttribute('filter');
+    g.insertBefore(poly,mr.nextSibling);
+  }
+  poly.setAttribute('points',pointsStr);
+  // Update tile overlay: convert rect to polygon if needed
+  let tile=g.querySelector('.room-tile');
+  if(tile&&tile.tagName.toLowerCase()==='rect'){
+    const np=ce('polygon');np.setAttribute('points',pointsStr);
+    np.setAttribute('fill',tile.getAttribute('fill'));np.setAttribute('stroke','none');
+    np.setAttribute('class','room-tile');np.setAttribute('pointer-events','none');
+    tile.replaceWith(np);
+  }else if(tile&&tile.tagName.toLowerCase()==='polygon'){
+    tile.setAttribute('points',pointsStr);
+  }
+  // Update bounding rect
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  pts.forEach(([x,y])=>{minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y)});
+  mr.setAttribute('x',minX);mr.setAttribute('y',minY);mr.setAttribute('width',maxX-minX);mr.setAttribute('height',maxY-minY);
+}
+function centerLabelsForPoly(g){
+  const pts=polyPoints(g);if(!pts)return;
+  const c=polyCentroid(pts);
+  const lbl=g.querySelector('.room-label');
+  const sub=g.querySelector('.room-sub');
+  if(lbl){lbl.setAttribute('x',Math.round(c.x));
+    const tp=g.getAttribute('data-text-pos')||'center';
+    let minY=Infinity,maxY=-Infinity;pts.forEach(([x,y])=>{minY=Math.min(minY,y);maxY=Math.max(maxY,y)});
+    let ly;if(tp==='top')ly=minY+20;else if(tp==='bottom')ly=maxY-10;else ly=Math.round(c.y)+(sub?-4:4);
+    lbl.setAttribute('y',ly);
+  }
+  if(sub){sub.setAttribute('x',Math.round(c.x));sub.setAttribute('y',(+lbl.getAttribute('y'))+18)}
+}
+function setRoomShape(g,preset){
+  if(preset==='rect'){
+    g.removeAttribute('data-poly');
+    const poly=g.querySelector('.room-poly');if(poly){
+      const mr=gMainRect(g);
+      mr.setAttribute('fill',poly.getAttribute('fill')||'#f5f2ed');
+      mr.setAttribute('stroke',poly.getAttribute('stroke')||'#3a3a3a');
+      mr.setAttribute('stroke-width',poly.getAttribute('stroke-width')||'3.5');
+      mr.setAttribute('filter','url(#roomShd)');
+      poly.remove();
+    }
+    // Restore tile as rect
+    const tile=g.querySelector('.room-tile');
+    if(tile&&tile.tagName.toLowerCase()==='polygon'){
+      const mr=gMainRect(g);const w=+mr.getAttribute('width'),ht=+mr.getAttribute('height');
+      const nr=ce('rect');sa(nr,{x:0,y:0,width:w,height:ht,fill:tile.getAttribute('fill'),stroke:'none','pointer-events':'none'});
+      nr.setAttribute('class','room-tile');tile.replaceWith(nr);
+    }
+    centerLabels(g);pushH();updAutoDims();return;
+  }
+  const sp=SHAPE_PRESETS[preset];if(!sp)return;
+  const mr=gMainRect(g);
+  const w=+mr.getAttribute('width'),ht=+mr.getAttribute('height');
+  if(w<20||ht<20)return;
+  const pts=sp.map(([px,py])=>[Math.round(px*w),Math.round(py*ht)]);
+  g.setAttribute('data-poly',pts.map(p=>p.join(',')).join(' '));
+  updateRoomPoly(g);centerLabelsForPoly(g);pushH();updAutoDims();
+}
+
 // ═══════════════════════════════════════════════════════════════
 // BLOCK CREATION HELPERS
 // ═══════════════════════════════════════════════════════════════
@@ -1025,13 +1149,13 @@ function buildPlan(){
   dimG=svg.querySelector('#dimG');snapG=svg.querySelector('#snapG');
   liveG=svg.querySelector('#liveG');selG=svg.querySelector('#selG');
 
-  blocksG.appendChild(mkLabel(400,45,'Plano Base Conceptual - 85.85 m2',22,'#2d3436'));
+  insertByLayer(mkLabel(400,45,'Plano Base Conceptual - 85.85 m2',22,'#2d3436'));
 
   const bnd=ce('g');bnd.setAttribute('class','wall-block');bnd.setAttribute('data-type','boundary');bnd.setAttribute('data-name','Perimetro');
   sPos(bnd,50,80);
   const br=ce('rect');br.setAttribute('x',0);br.setAttribute('y',0);br.setAttribute('width',700);br.setAttribute('height',850);
   br.setAttribute('fill','none');br.setAttribute('stroke','#2d2d2d');br.setAttribute('stroke-width','8');br.setAttribute('filter','url(#planShd)');bnd.appendChild(br);
-  blocksG.appendChild(bnd);
+  insertByLayer(bnd);
 
   const rooms=[
     [50,80,350,300,'#f5f2ed','Habitacion 2','(Futuro Estudio)','#4a4a4a'],
@@ -1044,15 +1168,15 @@ function buildPlan(){
     [50,630,500,300,'#f5f3ec','Sala - Comedor',null,'#7a6830'],
     [550,750,200,180,'#f5edec','Cocina',null,'#8a3a3a'],
   ];
-  rooms.forEach(r=>blocksG.appendChild(mkRoom(...r)));
-  blocksG.appendChild(mkWall(330,380,40,250,'Muro Closet'));
-  blocksG.appendChild(mkWindow(55,76,90,true));
-  blocksG.appendChild(mkWindow(255,76,90,true));
-  blocksG.appendChild(mkWindow(605,76,90,true));
-  blocksG.appendChild(mkWindow(46,685,140,false));
-  blocksG.appendChild(mkDoor(405,925,70,true));
-  blocksG.appendChild(mkLabel(440,965,'PUERTA ENTRADA',12,'#3a3a3a'));
-  blocksG.appendChild(mkFurn(455,785,75,110,'#ffca28','Gran Isla'));
+  rooms.forEach(r=>insertByLayer(mkRoom(...r)));
+  insertByLayer(mkWall(330,380,40,250,'Muro Closet'));
+  insertByLayer(mkWindow(55,76,90,true));
+  insertByLayer(mkWindow(255,76,90,true));
+  insertByLayer(mkWindow(605,76,90,true));
+  insertByLayer(mkWindow(46,685,140,false));
+  insertByLayer(mkDoor(405,925,70,true));
+  insertByLayer(mkLabel(440,965,'PUERTA ENTRADA',12,'#3a3a3a'));
+  insertByLayer(mkFurn(455,785,75,110,'#ffca28','Gran Isla'));
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1481,7 +1605,7 @@ function dragMv(p,shift){
 function startRsz(h,p){
   if(S.sels.length!==1)return;
   S.rsz=true;S.rszH=h.getAttribute('data-h');
-  const rc=gRect(S.sels[0]);S.rszO={...rc,gx:gPos(S.sels[0]).x,gy:gPos(S.sels[0]).y};
+  const rc=gRect(S.sels[0]);S.rszO={...rc,gx:gPos(S.sels[0]).x,gy:gPos(S.sels[0]).y,poly:polyPoints(S.sels[0])};
   S.ds={x:p.x,y:p.y};
   S.rszAdj=[];
   if(S.sels[0].getAttribute('data-type')==='room'){
@@ -1505,6 +1629,11 @@ function rszMv(p){
   if(w<10)w=10;if(ht<10)ht=10;
   sPos(g,gx,gy);
   mr.setAttribute('width',w);mr.setAttribute('height',ht);
+  if(o.poly){
+    const sx=w/o.w,sy=ht/o.h;
+    const newPts=o.poly.map(([px,py])=>[Math.round(px*sx),Math.round(py*sy)]);
+    g.setAttribute('data-poly',newPts.map(p=>p.join(',')).join(' '));
+  }
   centerLabels(g);
   smartWallResize(g,h,gx,gy,w,ht);
   drawSelHandles();
@@ -1545,12 +1674,13 @@ function smartWallResize(g,handle,gx,gy,w,ht){
 }
 
 function centerLabels(g){
+  if(g.getAttribute('data-poly')){updateRoomPoly(g);centerLabelsForPoly(g);return}
   const mr=gMainRect(g);if(!mr)return;
   const w=+mr.getAttribute('width'),h=+mr.getAttribute('height');
   g.querySelectorAll('.room-label').forEach(t=>{t.setAttribute('x',w/2)});
   g.querySelectorAll('.room-sub').forEach(t=>{t.setAttribute('x',w/2)});
   const lbl=g.querySelector('.room-label');
-  if(lbl){const sub=g.querySelector('.room-sub');lbl.setAttribute('y',h/2+(sub?-4:4));if(sub)sub.setAttribute('y',h/2+14)}
+  if(lbl){const sub=g.querySelector('.room-sub');const tp=g.getAttribute('data-text-pos')||'center';let ly;if(tp==='top')ly=20;else if(tp==='bottom')ly=h-10;else ly=h/2+(sub?-4:4);lbl.setAttribute('y',ly);if(sub)sub.setAttribute('y',ly+18)}
   // Update hatch overlay for walls
   if(g.getAttribute('data-type')==='wall'){
     const rects=g.querySelectorAll('rect');
@@ -1586,15 +1716,15 @@ function drawDn(p){
   if(S.tool==='text'){
     showModal('Agregar texto','',txt=>{
       if(!txt)return;
-      blocksG.appendChild(mkLabel(sx,sy,txt,16,'#444'));
+      insertByLayer(mkLabel(sx,sy,txt,16,'#444'));
       pushH();updAutoDims();
     });return;
   }
   S.draw=true;S.drawS={x:sx,y:sy};
-  if(S.tool==='room'){S.drawEl=mkRoom(sx,sy,0,0,'#f5f2ed','',null,'#4a4a4a');blocksG.appendChild(S.drawEl)}
-  else if(S.tool==='wall'){S.drawEl=mkWall(sx,sy,0,0,'');blocksG.appendChild(S.drawEl)}
-  else if(S.tool==='door'){S.drawEl=mkDoor(sx,sy,0,true);blocksG.appendChild(S.drawEl)}
-  else if(S.tool==='window'){S.drawEl=mkWindow(sx,sy,0,true);blocksG.appendChild(S.drawEl)}
+  if(S.tool==='room'){S.drawEl=mkRoom(sx,sy,0,0,'#f5f2ed','',null,'#4a4a4a');insertByLayer(S.drawEl)}
+  else if(S.tool==='wall'){S.drawEl=mkWall(sx,sy,0,0,'');insertByLayer(S.drawEl)}
+  else if(S.tool==='door'){S.drawEl=mkDoor(sx,sy,0,true);insertByLayer(S.drawEl)}
+  else if(S.tool==='window'){S.drawEl=mkWindow(sx,sy,0,true);insertByLayer(S.drawEl)}
 }
 
 function drawMv(p){
@@ -1690,7 +1820,7 @@ function clipPaste(){
   S.clipboard.forEach(clone=>{
     const g=clone.cloneNode(true);
     const p=gPos(g);sPos(g,p.x+20,p.y+20);
-    blocksG.appendChild(g);ns.push(g);
+    insertByLayer(g);ns.push(g);
   });
   S.sels=ns;
   drawSelHandles();
@@ -1756,7 +1886,9 @@ function showProps(g){
     const mw=px2mx(rc.w),mh=px2my(rc.h);
     h+='<div class="pg">';
     h+=pv('Ancho',mw.toFixed(2)+' m')+pv('Alto',mh.toFixed(2)+' m');
-    if(mw>.1&&mh>.1)h+=pv('Area',(mw*mh).toFixed(2)+' m2');
+    const _pts=polyPoints(g);
+    if(_pts){h+=pv('Area',(polyArea(_pts)/((S.WPx/S.WM)*(S.HPx/S.HM))).toFixed(2)+' m2')}
+    else if(mw>.1&&mh>.1)h+=pv('Area',(mw*mh).toFixed(2)+' m2');
     h+=pv('Pos',px2mx(rc.x-S.OX).toFixed(1)+', '+px2my(rc.y-S.OY).toFixed(1)+' m');
     const rot=+g.getAttribute('data-rot')||0;
     const fh=+g.getAttribute('data-fliph')||0;
@@ -1768,13 +1900,38 @@ function showProps(g){
       h+='<div class="pg">';
       h+=pinp('X',pos.x,v=>{sPos(g,v,gPos(g).y);refreshS()});
       h+=pinp('Y',pos.y,v=>{sPos(g,gPos(g).x,v);refreshS()});
-      h+=pinp('W',+mr.getAttribute('width'),v=>{mr.setAttribute('width',v);centerLabels(g);refreshS()});
-      h+=pinp('H',+mr.getAttribute('height'),v=>{mr.setAttribute('height',v);centerLabels(g);refreshS()});
+      h+=pinp('W',+mr.getAttribute('width'),v=>{const oldW=+mr.getAttribute('width');mr.setAttribute('width',v);const pp=polyPoints(g);if(pp&&oldW>0){const sx=v/oldW;g.setAttribute('data-poly',pp.map(([px,py])=>[Math.round(px*sx),py].join(',')).join(' '))}centerLabels(g);refreshS()});
+      h+=pinp('H',+mr.getAttribute('height'),v=>{const oldH=+mr.getAttribute('height');mr.setAttribute('height',v);const pp=polyPoints(g);if(pp&&oldH>0){const sy=v/oldH;g.setAttribute('data-poly',pp.map(([px,py])=>[px,Math.round(py*sy)].join(',')).join(' '))}centerLabels(g);refreshS()});
       h+='</div><div style="height:8px"></div>';
-      h+=pcol('Relleno',mr.getAttribute('fill')||'#fff',v=>mr.setAttribute('fill',v));
+      const polyEl=g.querySelector('.room-poly');
+      h+=pcol('Relleno',(polyEl?polyEl.getAttribute('fill'):mr.getAttribute('fill'))||'#fff',v=>{const pe=g.querySelector('.room-poly');if(pe)pe.setAttribute('fill',v);else mr.setAttribute('fill',v)});
     }
     h+='<div style="height:8px"></div>';
     h+=ptxt('Nombre',name,v=>{g.setAttribute('data-name',v);const lb=g.querySelector('.room-label');if(lb)lb.textContent=v;$('ptitle').textContent=v;pushH()});
+    if(type==='room'||type==='label'){
+      const curFs=g.getAttribute('data-font-size')||'';
+      const curFf=g.getAttribute('data-font-family')||'Inter,Arial,sans-serif';
+      const curTp=g.getAttribute('data-text-pos')||'center';
+      const lbl=g.querySelector('.room-label');
+      const defFs=lbl?Math.round(+lbl.getAttribute('font-size')):14;
+      h+='<div style="height:8px"></div><div class="psh"><h3>Texto</h3></div>';
+      h+=pinp('Tamano',curFs?+curFs:defFs,v=>{g.setAttribute('data-font-size',v);applyTextStyle(g)});
+      h+=pselect('Fuente',[{v:'Inter,Arial,sans-serif',n:'Inter'},{v:'Georgia,serif',n:'Georgia'},{v:'Courier New,monospace',n:'Courier'},{v:'Arial,sans-serif',n:'Arial'}],curFf,v=>{g.setAttribute('data-font-family',v);applyTextStyle(g)});
+      if(type==='room')h+=pselect('Posicion',[{v:'top',n:'Arriba'},{v:'center',n:'Centro'},{v:'bottom',n:'Abajo'}],curTp,v=>{g.setAttribute('data-text-pos',v);applyTextStyle(g)});
+    }
+    if(type==='room'){
+      const curPoly=g.getAttribute('data-poly');
+      let curShape='rect';
+      if(curPoly){const mr2=gMainRect(g);const w2=mr2?+mr2.getAttribute('width'):1,h2=mr2?+mr2.getAttribute('height'):1;
+        for(const[k,v]of Object.entries(SHAPE_PRESETS)){if(!v)continue;const testPts=v.map(([px,py])=>[Math.round(px*w2),Math.round(py*h2)]);const testStr=testPts.map(p=>p.join(',')).join(' ');if(testStr===curPoly.trim()){curShape=k;break}}}
+      h+='<div style="height:8px"></div><div class="psh"><h3>Forma</h3></div>';
+      h+='<div style="display:flex;gap:3px;flex-wrap:wrap">';
+      Object.keys(SHAPE_PRESETS).forEach(k=>{
+        const active=k===curShape;
+        h+=`<button class="abtn" style="width:36px;height:28px;font-size:10px;font-weight:600;${active?'background:var(--acc);color:#fff':''}" onclick="setRoomShape(S.sels[0],'${k}')">${SHAPE_LABELS[k]||k}</button>`;
+      });
+      h+='</div>';
+    }
   }
   $('pcontent').innerHTML=h;
 }
@@ -1792,6 +1949,25 @@ function pv(l,v){return`<div class="pi"><div class="pl">${l}</div><div class="pv
 function pinp(l,v,fn){const id='_'+Math.random().toString(36).substr(2,5);setTimeout(()=>{const i=$(id);if(i)i.addEventListener('change',e=>{fn(+e.target.value);pushH();updAutoDims()})});return`<div class="pi"><div class="pl">${l}</div><input id="${id}" class="pin" type="number" value="${Math.round(v)}" step="5"></div>`}
 function ptxt(l,v,fn){const id='_'+Math.random().toString(36).substr(2,5);setTimeout(()=>{const i=$(id);if(i)i.addEventListener('change',e=>{fn(e.target.value)})});return`<div class="pi f"><div class="pl">${l}</div><input id="${id}" class="pin" type="text" value="${v}"></div>`}
 function pcol(l,v,fn){const id='_'+Math.random().toString(36).substr(2,5);if(!v||v==='none'||!v.startsWith('#'))v='#ffffff';setTimeout(()=>{const i=$(id);if(i){i.addEventListener('input',e=>fn(e.target.value));i.addEventListener('change',()=>pushH())}});return`<div class="pi f"><div class="pl">${l}</div><div class="pcr"><div class="pcs" style="background:${v}"><input id="${id}" type="color" value="${v}"></div><span style="font-size:11px;color:var(--txt3);font-family:monospace">${v}</span></div></div>`}
+function pselect(l,opts,cur,fn){const id='_'+Math.random().toString(36).substr(2,5);setTimeout(()=>{const el=$(id);if(el)el.addEventListener('change',e=>{fn(e.target.value);pushH();updAutoDims()})});let h=`<div class="pi f"><div class="pl">${l}</div><select id="${id}" class="pin">`;opts.forEach(o=>{h+=`<option value="${o.v}"${o.v===cur?' selected':''}>${o.n}</option>`});return h+'</select></div>'}
+function applyTextStyle(g){
+  const lbl=g.querySelector('.room-label');if(!lbl)return;
+  const mr=gMainRect(g);
+  const w=mr?+mr.getAttribute('width'):0,ht=mr?+mr.getAttribute('height'):0;
+  const fs=g.getAttribute('data-font-size');
+  const ff=g.getAttribute('data-font-family');
+  const tp=g.getAttribute('data-text-pos')||'center';
+  if(fs)lbl.setAttribute('font-size',fs);
+  if(ff){lbl.setAttribute('font-family',ff);const sub=g.querySelector('.room-sub');if(sub)sub.setAttribute('font-family',ff)}
+  const sub=g.querySelector('.room-sub');
+  let ly;
+  if(tp==='top')ly=20;
+  else if(tp==='bottom')ly=ht-10;
+  else ly=ht/2+(sub?-4:4);
+  lbl.setAttribute('y',ly);
+  if(sub)sub.setAttribute('y',ly+18);
+  refreshS();
+}
 function refreshS(){if(S.sels.length===1){drawSelHandles();showProps(S.sels[0])}}
 
 // ═══════════════════════════════════════════════════════════════
@@ -1804,7 +1980,7 @@ function delSel(){
 function dup(){
   if(S.sels.length===0)return;
   const ns=[];
-  S.sels.forEach(g=>{const c=g.cloneNode(true);const p=gPos(g);sPos(c,p.x+20,p.y+20);blocksG.appendChild(c);ns.push(c)});
+  S.sels.forEach(g=>{const c=g.cloneNode(true);const p=gPos(g);sPos(c,p.x+20,p.y+20);insertByLayer(c);ns.push(c)});
   S.sels=ns;drawSelHandles();pushH();updAutoDims();ctx.classList.remove('vis');
   if(ns.length===1)showProps(ns[0]);else showMultiProps();
   $('propsec').style.display='block';toast('Duplicado','ok');
@@ -1850,7 +2026,7 @@ function addCustomFurn(dropX,dropY){
   const nm=name.trim();
   const x=dropX!=null?dropX:350,y=dropY!=null?dropY:450;
   const g=mkFurn(x,y,60,40,'#f0ece8',nm);
-  blocksG.appendChild(g);sel(g);setT('select');pushH();updAutoDims();toast(nm+' agregado','ok');
+  insertByLayer(g);sel(g);setT('select');pushH();updAutoDims();toast(nm+' agregado','ok');
 }
 
 function buildLib(){
@@ -1880,7 +2056,7 @@ function buildLib(){
         });
         d.addEventListener('click',()=>{
           const g=mkFurn(350,450,it.w,it.h,it.f,it.n);
-          blocksG.appendChild(g);sel(g);setT('select');pushH();updAutoDims();toast(it.n+' agregado','ok');
+          insertByLayer(g);sel(g);setT('select');pushH();updAutoDims();toast(it.n+' agregado','ok');
         });
       }
       grid.appendChild(d);
@@ -1900,7 +2076,7 @@ function onDrop(e){
       return;
     }
     const g=mkFurn(sn(p.x-data.w/2),sn(p.y-data.h/2),data.w,data.h,data.f,data.n);
-    blocksG.appendChild(g);sel(g);setT('select');pushH();updAutoDims();
+    insertByLayer(g);sel(g);setT('select');pushH();updAutoDims();
     toast(data.n+' agregado','ok');
   }catch(err){}
 }
@@ -1911,7 +2087,7 @@ function buildColors(){
   cols.forEach(c=>{
     const d=document.createElement('div');d.className='qcd';d.style.background=c;d.title=c;
     d.addEventListener('click',()=>{
-      S.sels.forEach(g=>{const mr=gMainRect(g);if(mr)mr.setAttribute('fill',c)});
+      S.sels.forEach(g=>{const pe=g.querySelector('.room-poly');if(pe)pe.setAttribute('fill',c);else{const mr=gMainRect(g);if(mr)mr.setAttribute('fill',c)}});
       pushH();if(S.sels.length===1)showProps(S.sels[0]);
     });
     box.appendChild(d);
@@ -1941,7 +2117,10 @@ function calcTotalArea(){
   let total=0;const rooms=[];
   blocksG.querySelectorAll('[data-type="room"]').forEach(g=>{
     const rc=gRect(g);if(!rc)return;
-    const mw=px2mx(rc.w),mh=px2my(rc.h),area=mw*mh;
+    const pts=polyPoints(g);
+    let area;
+    if(pts){area=polyArea(pts)/((S.WPx/S.WM)*(S.HPx/S.HM))}
+    else{const mw=px2mx(rc.w),mh=px2my(rc.h);area=mw*mh}
     total+=area;rooms.push({name:g.getAttribute('data-name')||'?',area});
   });
   let h='<div style="font-size:11px;color:var(--txt2);line-height:1.8">';
@@ -2014,7 +2193,7 @@ function applyLayers(){
 function pushH(){const c=blocksG.innerHTML;S.hist=S.hist.slice(0,S.hi+1);S.hist.push(c);S.hi=S.hist.length-1;if(S.hist.length>60){S.hist.shift();S.hi--}S.dirty=true;updProjIndicator()}
 function undo(){if(S.hi<=0)return;S.hi--;restoreH();toast('Deshacer')}
 function redo(){if(S.hi>=S.hist.length-1)return;S.hi++;restoreH();toast('Rehacer')}
-function restoreH(){desel();blocksG.innerHTML=S.hist[S.hi];updAutoDims();applyLayers()}
+function restoreH(){desel();blocksG.innerHTML=S.hist[S.hi];sortBlocksZ();updAutoDims();applyLayers()}
 
 // ═══════════════════════════════════════════════════════════════
 // FILE I/O
@@ -2253,7 +2432,7 @@ function importProjectFile(e){
 }
 function loadProject(name){
   const proj=getProjects().find(p=>p.name===name);if(!proj)return;
-  buildPlan();blocksG.innerHTML=proj.data.blocks;
+  buildPlan();blocksG.innerHTML=proj.data.blocks;sortBlocksZ();
   S.WM=proj.data.wm||8.5;S.HM=proj.data.hm||10.1;
   $('sw').value=S.WM;$('sh').value=S.HM;
   if(proj.data.bgImg&&bgImgG){
@@ -2440,30 +2619,30 @@ function buildFromTemplate(id,cwm,chm){
   const pw=v=>(v/wm)*S.WPx;
   const ph=v=>(v/hm)*S.HPx;
 
-  blocksG.appendChild(mkLabel(400,45,t.title,22,'#2d3436'));
+  insertByLayer(mkLabel(400,45,t.title,22,'#2d3436'));
   const bnd=ce('g');bnd.setAttribute('class','wall-block');bnd.setAttribute('data-type','boundary');bnd.setAttribute('data-name','Perimetro');
   sPos(bnd,S.OX,S.OY);
   const br=ce('rect');sa(br,{x:0,y:0,width:S.WPx,height:S.HPx,fill:'none',stroke:'#2d2d2d','stroke-width':'8',filter:'url(#planShd)'});
-  bnd.appendChild(br);blocksG.appendChild(bnd);
+  bnd.appendChild(br);insertByLayer(bnd);
 
-  t.rooms.forEach(r=>{blocksG.appendChild(mkRoom(mpx(r.x),mpy(r.y),pw(r.w),ph(r.h),r.f,r.n,r.s||null,r.tc||'#4a4a4a'))});
+  t.rooms.forEach(r=>{insertByLayer(mkRoom(mpx(r.x),mpy(r.y),pw(r.w),ph(r.h),r.f,r.n,r.s||null,r.tc||'#4a4a4a'))});
 
   (t.wins||[]).forEach(w=>{
-    if(w.hz)blocksG.appendChild(mkWindow(mpx(w.x),mpy(w.y)-4,pw(w.w),true));
-    else blocksG.appendChild(mkWindow(mpx(w.x)-4,mpy(w.y),ph(w.w),false));
+    if(w.hz)insertByLayer(mkWindow(mpx(w.x),mpy(w.y)-4,pw(w.w),true));
+    else insertByLayer(mkWindow(mpx(w.x)-4,mpy(w.y),ph(w.w),false));
   });
   (t.doors||[]).forEach(d=>{
-    if(d.hz)blocksG.appendChild(mkDoor(mpx(d.x),mpy(d.y),pw(d.w),true));
-    else blocksG.appendChild(mkDoor(mpx(d.x),mpy(d.y),ph(d.w),false));
+    if(d.hz)insertByLayer(mkDoor(mpx(d.x),mpy(d.y),pw(d.w),true));
+    else insertByLayer(mkDoor(mpx(d.x),mpy(d.y),ph(d.w),false));
   });
   if(t.ent){
     const e=t.ent;
     if(e.hz){
-      blocksG.appendChild(mkDoor(mpx(e.x),mpy(e.y)-5,pw(e.w),true));
-      blocksG.appendChild(mkLabel(mpx(e.x+e.w/2),mpy(e.y)+15,'ENTRADA',12,'#3a3a3a'));
+      insertByLayer(mkDoor(mpx(e.x),mpy(e.y)-5,pw(e.w),true));
+      insertByLayer(mkLabel(mpx(e.x+e.w/2),mpy(e.y)+15,'ENTRADA',12,'#3a3a3a'));
     }else{
-      blocksG.appendChild(mkDoor(mpx(e.x)-5,mpy(e.y),ph(e.w),false));
-      blocksG.appendChild(mkLabel(mpx(e.x)+15,mpy(e.y+e.w/2),'ENTRADA',12,'#3a3a3a'));
+      insertByLayer(mkDoor(mpx(e.x)-5,mpy(e.y),ph(e.w),false));
+      insertByLayer(mkLabel(mpx(e.x)+15,mpy(e.y+e.w/2),'ENTRADA',12,'#3a3a3a'));
     }
   }
 
