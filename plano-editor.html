@@ -37,11 +37,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .tck input:checked+.ck{background:var(--acc);border-color:var(--acc)}
 .tck input:checked+.ck::after{content:'';width:3px;height:6px;border:solid #fff;border-width:0 1.5px 1.5px 0;transform:rotate(45deg) translate(-0.5px,-0.5px)}
 
+/* PROJECT INDICATOR */
+#projind{display:none;align-items:center;gap:5px;padding:0 8px;font-size:11px;color:var(--txt);white-space:nowrap;max-width:180px}
+.pi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pi-dot.saved{background:var(--grn)}
+.pi-dot.dirty{background:var(--ylw)}
+.pi-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+/* SAVE DROPDOWN */
+.save-wrap{position:relative}
+.save-dd{display:none;position:absolute;top:100%;left:0;margin-top:4px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:50;min-width:190px;padding:4px;animation:mi .1s ease-out}
+.save-dd.vis{display:block}
+.save-dd button{display:flex;align-items:center;gap:6px;width:100%;padding:7px 10px;border:none;background:none;color:var(--txt2);font-size:11px;cursor:pointer;border-radius:5px;text-align:left;white-space:nowrap}
+.save-dd button:hover{background:var(--bg4);color:var(--txt)}
+.save-dd button svg{width:14px;height:14px;flex-shrink:0}
+.save-dd .sdd-sep{height:1px;background:var(--brd);margin:3px 4px}
+
 /* MAIN */
-#main{display:flex;flex:1;overflow:hidden}
+#main{display:flex;flex:1;min-height:0}
 
 /* TOOLBAR */
-#tools{width:50px;background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;padding:6px;gap:2px;flex-shrink:0;z-index:5}
+#tools{width:50px;background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;padding:6px;gap:2px;flex-shrink:0;position:relative;z-index:8}
 .tbn{width:38px;height:36px;display:flex;align-items:center;justify-content:center;border:none;border-radius:6px;background:none;cursor:pointer;color:var(--txt2);position:relative;transition:all .12s}
 .tbn svg{width:18px;height:18px}
 .tbn:hover{background:var(--bg4);color:var(--txt)}
@@ -61,7 +76,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 
 /* SVG elements */
 .room-block{cursor:pointer}
-.room-block:hover .room-rect{stroke-width:3;stroke:var(--acc)}
+.room-block:hover .room-rect{stroke-width:5;stroke:var(--acc)}
 .room-rect{transition:stroke .1s,stroke-width .1s}
 .room-label{pointer-events:none;user-select:none}
 .room-sub{pointer-events:none;user-select:none}
@@ -70,9 +85,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .furn-block:hover rect:first-child{stroke:var(--acc);stroke-width:2}
 .furn-detail{pointer-events:none}
 .win-block{cursor:pointer}
-.win-block:hover rect:first-child{stroke:var(--acc);stroke-width:2}
+.win-block:hover line{stroke:var(--acc)}
+.win-block:hover rect:first-child{stroke:var(--acc);stroke-width:1}
 .door-block{cursor:pointer}
-.door-block:hover rect{stroke:var(--acc);stroke-width:2}
+.door-block:hover line{stroke:var(--acc)}
+.door-block:hover path{stroke:var(--acc)}
 .wall-block{cursor:pointer}
 .wall-block:hover rect:first-child{stroke:var(--acc);stroke-width:2.5}
 .sel-box{fill:none;stroke:var(--acc);stroke-width:1.5;stroke-dasharray:5,3;pointer-events:none}
@@ -83,7 +100,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .dim-g line.dl{stroke:var(--pink);stroke-width:1.5}
 .dim-g line.de{stroke:var(--pink);stroke-width:.8;opacity:.5}
 .dim-g text{fill:var(--pink);font-size:12px;font-weight:700;text-anchor:middle;font-family:Inter,Arial,sans-serif}
-.dim-g rect.dbg{fill:#fafbfc;rx:3}
+.dim-g rect.dbg{fill:#f8f6f1;rx:3}
+.room-tile{pointer-events:none;opacity:.6}
 .live-t{fill:var(--ylw);font-size:13px;font-weight:700;text-anchor:middle;pointer-events:none;font-family:Inter,Arial,sans-serif}
 .grid-maj{stroke:#1e1e3a;stroke-width:.8}
 .grid-min{stroke:#15152a;stroke-width:.4}
@@ -96,6 +114,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .rot-h{fill:var(--acc2);stroke:#fff;stroke-width:1.5;cursor:grab;pointer-events:all}
 .rot-h:hover{fill:var(--ylw)}
 .rot-line{stroke:var(--acc);stroke-width:1;stroke-dasharray:3,2;pointer-events:none}
+
+/* SELECTION ACTION BAR */
 
 /* RIGHT PANEL */
 #rpanel{width:250px;background:var(--bg2);border-left:1px solid var(--brd);display:flex;flex-direction:column;flex-shrink:0;z-index:5;overflow-y:auto}
@@ -170,22 +190,118 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 
 /* INLINE EDIT */
 .inline-edit{position:fixed;text-align:center;background:rgba(0,0,0,.85);color:#fff;border:2px solid var(--acc);border-radius:4px;outline:none;padding:3px 6px;font-family:Inter,Arial,sans-serif;font-weight:600;z-index:5000}
+
+/* LIGHT MODE */
+body.light{--bg0:#f5f5f5;--bg1:#fafafa;--bg2:#fff;--bg3:#f0f0f0;--bg4:#e8e8e8;
+  --brd:#ddd;--brd2:#ccc;--txt:#333;--txt2:#666;--txt3:#999;
+  --acc:#3a7bf7;--acc2:#2563eb;--accg:rgba(58,123,247,.15);--grn:#10b981;--ylw:#f59e0b;
+  --red:#ef4444;--pink:#ec4899;--org:#f97316}
+body.light #canvas{background:#e8e8e8;background-image:radial-gradient(#ddd 0%,#e8e8e8 70%)}
+body.light .inline-edit{background:rgba(255,255,255,.95);color:#333;border-color:var(--acc)}
+body.light .tbn.on{box-shadow:0 2px 8px rgba(58,123,247,.25)}
+body.light .toast{box-shadow:0 4px 16px rgba(0,0,0,.12)}
+body.light #ctx{box-shadow:0 8px 30px rgba(0,0,0,.15)}
+
+/* RULERS */
+.ruler{position:absolute;background:var(--bg2);overflow:hidden;z-index:6}
+.ruler canvas{display:block}
+#rulerH{top:0;left:22px;right:0;height:22px;border-bottom:1px solid var(--brd)}
+#rulerV{top:22px;left:0;bottom:0;width:22px;border-right:1px solid var(--brd)}
+#rulerC{position:absolute;top:0;left:0;width:22px;height:22px;background:var(--bg3);border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);z-index:7;display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--txt3)}
+
+/* ALIGN BUTTONS */
+.align-row{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px}
+.abtn{width:28px;height:26px;display:flex;align-items:center;justify-content:center;border:1px solid var(--brd);border-radius:4px;background:var(--bg4);cursor:pointer;color:var(--txt2);transition:all .12s;padding:0}
+.abtn:hover{background:var(--brd);color:var(--txt)}
+.abtn svg{width:14px;height:14px}
+
+/* BG IMAGE */
+.bg-ctrl{display:flex;align-items:center;gap:6px;padding:3px 0}
+.bg-ctrl input[type=range]{flex:1;height:4px;accent-color:var(--acc);cursor:pointer}
+.bg-ctrl span{font-size:9px;color:var(--txt3);min-width:28px;text-align:right}
+
+/* PROJECTS MODAL */
+.proj-list{max-height:260px;overflow-y:auto;margin-bottom:10px}
+.proj-item{display:flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid transparent;border-radius:6px;cursor:pointer;font-size:12px;color:var(--txt);transition:all .1s;margin-bottom:2px}
+.proj-item:hover{background:var(--bg4);border-color:var(--brd)}
+.proj-item.active{background:var(--accg);border-color:var(--acc)}
+.proj-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proj-date{font-size:9px;color:var(--txt3);white-space:nowrap}
+.proj-dl{width:20px;height:20px;display:flex;align-items:center;justify-content:center;border:none;background:none;color:var(--txt3);cursor:pointer;border-radius:3px;font-size:14px;line-height:1;flex-shrink:0}
+.proj-dl:hover{background:var(--acc);color:#fff}
+.proj-del{width:20px;height:20px;display:flex;align-items:center;justify-content:center;border:none;background:none;color:var(--txt3);cursor:pointer;border-radius:3px;font-size:14px;line-height:1;flex-shrink:0}
+.proj-del:hover{background:var(--red);color:#fff}
+
+/* WIZARD */
+.wiz-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.wiz-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:var(--bg4);border:2px solid var(--brd);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+.wiz-card:hover{border-color:var(--acc);background:var(--bg3);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.wiz-card:active{transform:scale(.97)}
+.wiz-card svg{border-radius:4px;background:var(--bg0);border:1px solid var(--brd)}
+.wiz-card h4{font-size:11px;font-weight:700;color:var(--txt);margin:0;text-align:center}
+.wiz-card .wiz-info{font-size:9px;color:var(--txt3);text-align:center}
+.wiz-sep{display:flex;align-items:center;gap:8px;margin:6px 0 10px;font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.wiz-sep::before,.wiz-sep::after{content:'';flex:1;height:1px;background:var(--brd)}
+.wiz-custom{display:flex;align-items:flex-end;gap:8px}
+.wiz-custom .wiz-field{display:flex;flex-direction:column;gap:3px}
+.wiz-custom .wiz-field label{font-size:9px;color:var(--txt3);font-weight:600;text-transform:uppercase}
+.wiz-custom .wiz-field input{width:70px;padding:6px 8px;background:var(--bg0);border:1px solid var(--brd);border-radius:5px;color:var(--txt);font-size:12px;font-weight:600;text-align:center}
+.wiz-custom .wiz-field input:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 2px var(--accg)}
+
+/* HELP MODAL */
+.help-body{max-height:65vh;overflow-y:auto;padding-right:4px}
+.help-body::-webkit-scrollbar{width:5px}
+.help-body::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:3px}
+.help-intro{background:linear-gradient(135deg,var(--accg),rgba(61,214,160,.1));border:1px solid var(--acc);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.6;color:var(--txt)}
+.help-intro b{color:var(--acc)}
+.help-sec{border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.help-hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;user-select:none;font-size:12px;font-weight:700;color:var(--txt);transition:background .1s}
+.help-hdr:hover{background:var(--bg4)}
+.help-hdr svg{width:16px;height:16px;color:var(--acc);flex-shrink:0}
+.help-hdr span{flex:1}
+.help-hdr .chevron{width:12px;height:12px;color:var(--txt3);transition:transform .15s;flex-shrink:0}
+.help-sec.open .help-hdr .chevron{transform:rotate(90deg)}
+.help-cnt{display:none;padding:0 12px 12px;font-size:11px;line-height:1.65;color:var(--txt2)}
+.help-sec.open .help-cnt{display:block}
+.help-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.help-num{width:24px;height:24px;background:var(--acc);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.help-stxt{flex:1}
+.help-stxt b{color:var(--txt)}
+.help-tbl{width:100%;border-collapse:collapse;margin:6px 0}
+.help-tbl th{text-align:left;font-size:10px;color:var(--txt3);font-weight:600;padding:4px 8px;border-bottom:1px solid var(--brd);text-transform:uppercase;letter-spacing:.4px}
+.help-tbl td{padding:5px 8px;border-bottom:1px solid var(--brd);font-size:11px}
+.help-tbl td:first-child{font-weight:600;color:var(--txt);white-space:nowrap}
+.help-tbl tr:last-child td{border-bottom:none}
+.help-kbd{display:inline-block;background:var(--bg0);border:1px solid var(--brd);border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600;color:var(--txt);font-family:'SF Mono','Fira Code',monospace;line-height:1.4}
+.help-tip{background:var(--bg4);border-left:3px solid var(--ylw);border-radius:0 6px 6px 0;padding:8px 10px;margin:8px 0;font-size:11px;color:var(--txt2)}
+.help-tip b{color:var(--ylw)}
 </style>
 </head>
 <body>
 
 <div id="topbar">
-  <div class="logo">ArquiPlan <span>v4</span></div>
+  <div class="logo">ArquiPlan <span>v1.0</span></div>
   <div class="sep"></div>
   <div class="tg">
-    <button class="tb" onclick="loadFile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Abrir</button>
-    <button class="tb" onclick="save()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Guardar</button>
-    <button class="tb" onclick="resetPlan()">Reset</button>
+    <button class="tb" onclick="showWizard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo</button>
+    <button class="tb" onclick="showProjectsModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>Abrir</button>
+    <div class="save-wrap">
+      <button class="tb" onclick="toggleSaveDD()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Guardar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;margin-left:-2px"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="save-dd" id="savedd">
+        <button onclick="saveProject();closeSaveDD()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Guardar (Ctrl+S)</button>
+        <button onclick="showSaveAsModal();closeSaveDD()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>Guardar como...</button>
+        <div class="sdd-sep"></div>
+        <button onclick="exportProjectFile();closeSaveDD()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar archivo .json</button>
+        <button onclick="$('projinput').click();closeSaveDD()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar archivo .json</button>
+      </div>
+    </div>
   </div>
+  <div id="projind"></div>
   <div class="sep"></div>
   <div class="tg">
     <button class="tb pr" onclick="expSVG()">SVG</button>
     <button class="tb" onclick="expPNG()">PNG</button>
+    <button class="tb" onclick="expPDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF</button>
   </div>
   <div class="sep"></div>
   <div class="tg">
@@ -204,7 +320,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   <label class="tck"><input type="checkbox" id="snapck" checked><span class="ck"></span>Snap</label>
   <label class="tck"><input type="checkbox" id="dimck" checked onchange="togDims()"><span class="ck"></span>Cotas</label>
   <label class="tck"><input type="checkbox" id="scaleck" checked onchange="togScale()"><span class="ck"></span>Escala</label>
+  <label class="tck"><input type="checkbox" id="rulerck" checked onchange="togRulers()"><span class="ck"></span>Reglas</label>
+  <div class="sep"></div>
+  <button class="tb" onclick="importBgImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Fondo</button>
   <div style="flex:1"></div>
+  <button class="tb" onclick="showHelp()" title="Ayuda" style="padding:5px 7px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
+  <button class="tb" onclick="toggleTheme()" id="themeBtn" title="Modo claro/oscuro" style="padding:5px 7px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
   <div class="tg">
     <button class="tb" onclick="undo()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg></button>
     <button class="tb" onclick="redo()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.13-9.36L23 10"/></svg></button>
@@ -228,6 +349,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   </div>
 
   <div id="canvas" oncontextmenu="return false">
+    <div id="rulerC">m</div>
+    <div class="ruler" id="rulerH"><canvas id="rHc"></canvas></div>
+    <div class="ruler" id="rulerV"><canvas id="rVc"></canvas></div>
     <div id="svgwrap"></div>
   </div>
 
@@ -235,6 +359,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
     <div class="psec" id="propsec" style="display:none">
       <div class="psh"><h3 id="ptitle">Propiedades</h3><span class="badge" id="ptype"></span></div>
       <div id="pcontent"></div>
+      <div style="height:8px"></div>
+      <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <button class="abtn" onclick="rot90()" title="Rotar 90° (R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+        <button class="abtn" onclick="flipH()" title="Voltear Horizontal (H)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><polyline points="16 6 20 12 16 18"/><polyline points="8 6 4 12 8 18"/></svg></button>
+        <button class="abtn" onclick="flipV()" title="Voltear Vertical (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><polyline points="6 8 12 4 18 8"/><polyline points="6 16 12 20 18 16"/></svg></button>
+        <div style="width:1px;height:20px;background:var(--brd);margin:0 2px"></div>
+        <button class="abtn" onclick="dup()" title="Duplicar (Ctrl+D)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+        <button class="abtn" onclick="delSel()" title="Eliminar (Supr)" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+    </div>
+    <div class="psec" id="alignsec" style="display:none">
+      <div class="psh"><h3>Alinear</h3></div>
+      <div class="align-row">
+        <button class="abtn" onclick="alignSel('left')" title="Alinear izquierda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="2" x2="4" y2="22"/><rect x="7" y="4" width="13" height="5" rx="1"/><rect x="7" y="13" width="8" height="5" rx="1"/></svg></button>
+        <button class="abtn" onclick="alignSel('centerH')" title="Centrar horizontal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><rect x="5" y="4" width="14" height="5" rx="1"/><rect x="7" y="13" width="10" height="5" rx="1"/></svg></button>
+        <button class="abtn" onclick="alignSel('right')" title="Alinear derecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="20" y1="2" x2="20" y2="22"/><rect x="4" y="4" width="13" height="5" rx="1"/><rect x="9" y="13" width="8" height="5" rx="1"/></svg></button>
+        <button class="abtn" onclick="alignSel('top')" title="Alinear arriba"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="4" x2="22" y2="4"/><rect x="4" y="7" width="5" height="13" rx="1"/><rect x="13" y="7" width="5" height="8" rx="1"/></svg></button>
+        <button class="abtn" onclick="alignSel('centerV')" title="Centrar vertical"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/><rect x="4" y="5" width="5" height="14" rx="1"/><rect x="13" y="7" width="5" height="10" rx="1"/></svg></button>
+        <button class="abtn" onclick="alignSel('bottom')" title="Alinear abajo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="20" x2="22" y2="20"/><rect x="4" y="4" width="5" height="13" rx="1"/><rect x="13" y="9" width="5" height="8" rx="1"/></svg></button>
+      </div>
+      <div class="align-row">
+        <button class="abtn" onclick="alignSel('distH')" title="Distribuir horizontal" style="width:auto;padding:0 8px;font-size:9px;gap:3px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="4" y1="2" x2="4" y2="22"/><line x1="20" y1="2" x2="20" y2="22"/><rect x="9" y="6" width="6" height="12" rx="1"/></svg>Dist H</button>
+        <button class="abtn" onclick="alignSel('distV')" title="Distribuir vertical" style="width:auto;padding:0 8px;font-size:9px;gap:3px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="2" y1="4" x2="22" y2="4"/><line x1="2" y1="20" x2="22" y2="20"/><rect x="6" y="9" width="12" height="6" rx="1"/></svg>Dist V</button>
+      </div>
+    </div>
+    <div class="psec" id="bgsec">
+      <div class="psh"><h3>Imagen de Fondo</h3></div>
+      <div id="bgcontent">
+        <div style="font-size:11px;color:var(--txt3);padding:4px 0">Sin imagen de fondo</div>
+      </div>
     </div>
     <div class="psec" id="layersec">
       <div class="psh"><h3>Capas</h3></div>
@@ -264,6 +418,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 <div id="ctx">
   <div class="ci" onclick="dup()">Duplicar <span class="sk">Ctrl+D</span></div>
   <div class="ci" onclick="rot90()">Rotar 90° <span class="sk">R</span></div>
+  <div class="ci" onclick="flipH()">Voltear ↔ <span class="sk">H</span></div>
+  <div class="ci" onclick="flipV()">Voltear ↕ <span class="sk">V</span></div>
   <div class="ci" onclick="front()">Al frente</div>
   <div class="ci" onclick="back()">Al fondo</div>
   <div class="csp"></div>
@@ -283,13 +439,227 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   </div>
 </div>
 
+<div class="mo" id="savemodal">
+  <div class="mod" style="min-width:340px">
+    <h3>Guardar proyecto</h3>
+    <input type="text" id="savename" placeholder="Nombre del proyecto" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();doSaveAs()}">
+    <div class="moa">
+      <button class="mob" onclick="$('savemodal').classList.remove('vis')">Cancelar</button>
+      <button class="mob pr" onclick="doSaveAs()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="projmodal">
+  <div class="mod" style="min-width:380px">
+    <h3>Proyectos</h3>
+    <div id="projlist" class="proj-list"></div>
+    <div class="moa">
+      <button class="mob" onclick="$('projmodal').classList.remove('vis')">Cerrar</button>
+      <button class="mob" onclick="$('projmodal').classList.remove('vis');$('projinput').click()">Importar .json</button>
+      <button class="mob pr" onclick="$('projmodal').classList.remove('vis');showWizard()">Nuevo proyecto</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="wizmodal">
+  <div class="mod" style="min-width:520px;max-width:560px">
+    <h3 style="margin-bottom:4px">Nuevo Proyecto</h3>
+    <p style="font-size:11px;color:var(--txt3);margin-bottom:12px">Elige una plantilla o crea un lienzo personalizado</p>
+    <div class="wiz-grid">
+      <div class="wiz-card" onclick="pickTemplate('estudio')">
+        <svg width="70" height="58" viewBox="0 0 70 58"><rect x="2" y="2" width="66" height="54" fill="none" stroke="var(--txt3)" stroke-width="1.5" rx="1"/><rect x="2" y="2" width="42" height="36" fill="var(--accg)" stroke="var(--brd2)" stroke-width=".7"/><text x="23" y="23" font-size="5" fill="var(--txt2)" text-anchor="middle">Sala</text><rect x="44" y="2" width="24" height="20" fill="#eaf2f5" stroke="var(--brd2)" stroke-width=".7"/><text x="56" y="14" font-size="4.5" fill="var(--txt2)" text-anchor="middle">Bano</text><rect x="44" y="22" width="24" height="16" fill="#f5edec" stroke="var(--brd2)" stroke-width=".7"/><text x="56" y="32" font-size="4.5" fill="var(--txt2)" text-anchor="middle">Cocina</text><rect x="2" y="38" width="66" height="18" fill="#f5f3ec" stroke="var(--brd2)" stroke-width=".7"/><text x="35" y="50" font-size="5" fill="var(--txt2)" text-anchor="middle">Dormitorio</text></svg>
+        <h4>Estudio</h4>
+        <span class="wiz-info">~35 m² &middot; 1 ambiente</span>
+      </div>
+      <div class="wiz-card" onclick="pickTemplate('1hab')">
+        <svg width="70" height="58" viewBox="0 0 70 58"><rect x="2" y="2" width="66" height="54" fill="none" stroke="var(--txt3)" stroke-width="1.5" rx="1"/><rect x="2" y="2" width="34" height="30" fill="#f2f0eb" stroke="var(--brd2)" stroke-width=".7"/><text x="19" y="20" font-size="5" fill="var(--txt2)" text-anchor="middle">Dormitorio</text><rect x="36" y="2" width="32" height="30" fill="#f5f3ec" stroke="var(--brd2)" stroke-width=".7"/><text x="52" y="20" font-size="5" fill="var(--txt2)" text-anchor="middle">Sala</text><rect x="2" y="32" width="24" height="24" fill="#f5edec" stroke="var(--brd2)" stroke-width=".7"/><text x="14" y="47" font-size="5" fill="var(--txt2)" text-anchor="middle">Cocina</text><rect x="26" y="32" width="20" height="24" fill="#eaf2f5" stroke="var(--brd2)" stroke-width=".7"/><text x="36" y="47" font-size="4.5" fill="var(--txt2)" text-anchor="middle">Bano</text><rect x="46" y="32" width="22" height="24" fill="#f7f6f3" stroke="var(--brd2)" stroke-width=".7"/><text x="57" y="47" font-size="4.5" fill="var(--txt2)" text-anchor="middle">Pasillo</text></svg>
+        <h4>1 Habitacion</h4>
+        <span class="wiz-info">~50 m² &middot; 4 ambientes</span>
+      </div>
+      <div class="wiz-card" onclick="pickTemplate('2hab')">
+        <svg width="70" height="58" viewBox="0 0 70 58"><rect x="2" y="2" width="66" height="54" fill="none" stroke="var(--txt3)" stroke-width="1.5" rx="1"/><rect x="2" y="2" width="34" height="26" fill="#f2f0eb" stroke="var(--brd2)" stroke-width=".7"/><text x="19" y="18" font-size="4.5" fill="var(--txt2)" text-anchor="middle">Hab. Princ.</text><rect x="36" y="2" width="32" height="26" fill="#f5f2ed" stroke="var(--brd2)" stroke-width=".7"/><text x="52" y="18" font-size="5" fill="var(--txt2)" text-anchor="middle">Hab. 2</text><rect x="2" y="28" width="40" height="28" fill="#f5f3ec" stroke="var(--brd2)" stroke-width=".7"/><text x="22" y="45" font-size="5" fill="var(--txt2)" text-anchor="middle">Sala-Comedor</text><rect x="42" y="28" width="26" height="14" fill="#eaf2f5" stroke="var(--brd2)" stroke-width=".7"/><text x="55" y="37" font-size="4.5" fill="var(--txt2)" text-anchor="middle">Bano</text><rect x="42" y="42" width="26" height="14" fill="#f5edec" stroke="var(--brd2)" stroke-width=".7"/><text x="55" y="52" font-size="4.5" fill="var(--txt2)" text-anchor="middle">Cocina</text></svg>
+        <h4>2 Habitaciones</h4>
+        <span class="wiz-info">~70 m² &middot; 5 ambientes</span>
+      </div>
+      <div class="wiz-card" onclick="pickTemplate('3hab')">
+        <svg width="70" height="58" viewBox="0 0 70 58"><rect x="2" y="2" width="66" height="54" fill="none" stroke="var(--txt3)" stroke-width="1.5" rx="1"/><rect x="2" y="2" width="30" height="22" fill="#f5f2ed" stroke="var(--brd2)" stroke-width=".7"/><text x="17" y="15" font-size="4" fill="var(--txt2)" text-anchor="middle">Hab. 2</text><rect x="32" y="2" width="36" height="22" fill="#f2f0eb" stroke="var(--brd2)" stroke-width=".7"/><text x="50" y="15" font-size="4" fill="var(--txt2)" text-anchor="middle">Hab. 1</text><rect x="2" y="24" width="24" height="18" fill="#f3eef5" stroke="var(--brd2)" stroke-width=".7"/><text x="14" y="35" font-size="4" fill="var(--txt2)" text-anchor="middle">Hab. 3</text><rect x="26" y="24" width="14" height="18" fill="#f7f6f3" stroke="var(--brd2)" stroke-width=".7"/><rect x="40" y="24" width="28" height="18" fill="#eaf2f5" stroke="var(--brd2)" stroke-width=".7"/><text x="54" y="35" font-size="4" fill="var(--txt2)" text-anchor="middle">Banos</text><rect x="2" y="42" width="42" height="14" fill="#f5f3ec" stroke="var(--brd2)" stroke-width=".7"/><text x="23" y="52" font-size="4.5" fill="var(--txt2)" text-anchor="middle">Sala-Comedor</text><rect x="44" y="42" width="24" height="14" fill="#f5edec" stroke="var(--brd2)" stroke-width=".7"/><text x="56" y="52" font-size="4" fill="var(--txt2)" text-anchor="middle">Cocina</text></svg>
+        <h4>Mi Apartamento</h4>
+        <span class="wiz-info">~85 m² &middot; 9 ambientes</span>
+      </div>
+      <div class="wiz-card" onclick="pickTemplate('casa')">
+        <svg width="70" height="58" viewBox="0 0 70 58"><rect x="2" y="2" width="66" height="54" fill="none" stroke="var(--txt3)" stroke-width="1.5" rx="1"/><rect x="2" y="2" width="22" height="18" fill="#f2f0eb" stroke="var(--brd2)" stroke-width=".7"/><text x="13" y="13" font-size="3.5" fill="var(--txt2)" text-anchor="middle">Hab.1</text><rect x="24" y="2" width="22" height="18" fill="#f5f2ed" stroke="var(--brd2)" stroke-width=".7"/><text x="35" y="13" font-size="3.5" fill="var(--txt2)" text-anchor="middle">Hab.2</text><rect x="46" y="2" width="22" height="18" fill="#f3eef5" stroke="var(--brd2)" stroke-width=".7"/><text x="57" y="13" font-size="3.5" fill="var(--txt2)" text-anchor="middle">Hab.3</text><rect x="2" y="20" width="14" height="12" fill="#eaf2f5" stroke="var(--brd2)" stroke-width=".7"/><text x="9" y="28" font-size="3" fill="var(--txt2)" text-anchor="middle">B.1</text><rect x="16" y="20" width="14" height="12" fill="#eaf2f5" stroke="var(--brd2)" stroke-width=".7"/><text x="23" y="28" font-size="3" fill="var(--txt2)" text-anchor="middle">B.2</text><rect x="30" y="20" width="38" height="12" fill="#f7f6f3" stroke="var(--brd2)" stroke-width=".7"/><text x="49" y="28" font-size="3.5" fill="var(--txt2)" text-anchor="middle">Pasillo</text><rect x="2" y="32" width="34" height="24" fill="#f5f3ec" stroke="var(--brd2)" stroke-width=".7"/><text x="19" y="47" font-size="4" fill="var(--txt2)" text-anchor="middle">Sala-Comedor</text><rect x="36" y="32" width="18" height="24" fill="#f5edec" stroke="var(--brd2)" stroke-width=".7"/><text x="45" y="47" font-size="3.5" fill="var(--txt2)" text-anchor="middle">Cocina</text><rect x="54" y="32" width="14" height="24" fill="#edf5ef" stroke="var(--brd2)" stroke-width=".7"/><text x="61" y="47" font-size="3" fill="var(--txt2)" text-anchor="middle">Patio</text></svg>
+        <h4>Casa Pequena</h4>
+        <span class="wiz-info">~100 m² &middot; 10 ambientes</span>
+      </div>
+      <div class="wiz-card" onclick="pickTemplate('vacio')">
+        <svg width="70" height="58" viewBox="0 0 70 58"><rect x="2" y="2" width="66" height="54" fill="none" stroke="var(--txt3)" stroke-width="1.5" rx="1" stroke-dasharray="3,2"/><text x="35" y="32" font-size="6" fill="var(--txt3)" text-anchor="middle">Vacio</text></svg>
+        <h4>Lienzo Vacio</h4>
+        <span class="wiz-info">Dimensiones actuales</span>
+      </div>
+    </div>
+    <div class="wiz-sep">o personalizado</div>
+    <div class="wiz-custom">
+      <div class="wiz-field" style="flex:1;min-width:100px"><label>Nombre</label><input type="text" id="wizName" value="Mi plano" style="width:100%;text-align:left" autocomplete="off"></div>
+      <div class="wiz-field"><label>Ancho (m)</label><input type="number" id="wizW" value="8.5" min="2" max="30" step=".1"></div>
+      <div class="wiz-field"><label>Alto (m)</label><input type="number" id="wizH" value="10.1" min="2" max="30" step=".1"></div>
+      <button class="mob pr" onclick="buildCustom()" style="height:32px;padding:0 16px">Crear</button>
+      <button class="mob" onclick="$('wizmodal').classList.remove('vis')" style="height:32px">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="helpmodal">
+  <div class="mod" style="min-width:560px;max-width:620px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <h3 style="margin:0">Manual de Uso</h3>
+      <button class="mob" onclick="$('helpmodal').classList.remove('vis')" style="padding:4px 10px">Cerrar</button>
+    </div>
+    <div class="help-body">
+
+      <div class="help-intro">
+        Bienvenido a <b>ArquiPlan</b>, un editor visual de planos arquitectonicos. Aqui puedes dibujar habitaciones, agregar muebles, medir distancias y exportar tu plano. Todo funciona directamente en el navegador, sin instalar nada.
+      </div>
+
+      <!-- QUICK START -->
+      <div class="help-sec open">
+        <div class="help-hdr" onclick="togHelp(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <span>Primeros Pasos (Guia Rapida)</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="help-cnt">
+          <div class="help-step"><div class="help-num">1</div><div class="help-stxt"><b>Crear o abrir un plano</b><br>Haz click en <b>+ Nuevo</b> en la barra superior para elegir una plantilla (estudio, 1-3 habitaciones, casa) o crear un lienzo vacio con medidas personalizadas.</div></div>
+          <div class="help-step"><div class="help-num">2</div><div class="help-stxt"><b>Configurar la escala</b><br>En la barra superior, ajusta <b>Ancho</b> y <b>Alto</b> en metros reales. Esto afecta todas las medidas y cotas del plano.</div></div>
+          <div class="help-step"><div class="help-num">3</div><div class="help-stxt"><b>Editar habitaciones</b><br>Haz click en cualquier habitacion para seleccionarla. Arrastra para moverla. Usa los <b>cuadros blancos</b> en las esquinas para redimensionar. Haz <b>doble click</b> para editar el nombre.</div></div>
+          <div class="help-step"><div class="help-num">4</div><div class="help-stxt"><b>Agregar elementos</b><br>Usa la <b>barra de herramientas</b> (izquierda) para dibujar habitaciones, paredes, puertas, ventanas o texto. Tambien puedes <b>arrastrar muebles</b> desde la biblioteca del panel derecho directamente al plano.</div></div>
+          <div class="help-step"><div class="help-num">5</div><div class="help-stxt"><b>Navegar el plano</b><br>Usa la <b>rueda del mouse</b> para zoom. Mantiene <b>Alt + click</b> para mover la vista (pan). O selecciona la herramienta <b>Mover vista (H)</b>.</div></div>
+          <div class="help-step"><div class="help-num">6</div><div class="help-stxt"><b>Guardar y exportar</b><br>Click en <b>Guardar</b> o usa <b>Ctrl+S</b>. Se auto-guarda cada 30 seg. Exporta como <b>SVG</b>, <b>PNG</b>, <b>PDF</b> o archivo <b>.json</b> portable.</div></div>
+          <div class="help-tip"><b>Tip:</b> Mantiene <b>Shift</b> mientras arrastras para mover en linea recta (solo X o solo Y).</div>
+        </div>
+      </div>
+
+      <!-- TOOLS -->
+      <div class="help-sec">
+        <div class="help-hdr" onclick="togHelp(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          <span>Herramientas</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="help-cnt">
+          <table class="help-tbl">
+            <tr><th>Herramienta</th><th>Tecla</th><th>Descripcion</th></tr>
+            <tr><td>Seleccionar</td><td><span class="help-kbd">V</span></td><td>Click para seleccionar. Arrastrar para mover. Shift+click para multi-seleccion.</td></tr>
+            <tr><td>Mover vista</td><td><span class="help-kbd">H</span></td><td>Arrastra para mover la vista del plano. Tambien: Alt+click en cualquier modo.</td></tr>
+            <tr><td>Habitacion</td><td><span class="help-kbd">R</span></td><td>Click y arrastra para dibujar un rectangulo de habitacion.</td></tr>
+            <tr><td>Pared</td><td><span class="help-kbd">W</span></td><td>Dibuja un muro/tabique con patron de tramado.</td></tr>
+            <tr><td>Puerta</td><td><span class="help-kbd">D</span></td><td>Dibuja una puerta con arco de apertura. Se adhiere a paredes cercanas.</td></tr>
+            <tr><td>Ventana</td><td><span class="help-kbd">N</span></td><td>Dibuja una ventana. Se adhiere automaticamente a paredes cercanas.</td></tr>
+            <tr><td>Texto</td><td><span class="help-kbd">T</span></td><td>Agrega una etiqueta de texto libre en el plano.</td></tr>
+            <tr><td>Cota</td><td><span class="help-kbd">M</span></td><td>Mide la distancia entre 2 puntos. Click en inicio y fin.</td></tr>
+            <tr><td>Borrador</td><td><span class="help-kbd">E</span></td><td>Click en un elemento para eliminarlo.</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- KEYBOARD -->
+      <div class="help-sec">
+        <div class="help-hdr" onclick="togHelp(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
+          <span>Atajos de Teclado</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="help-cnt">
+          <table class="help-tbl">
+            <tr><th>Atajo</th><th>Accion</th></tr>
+            <tr><td><span class="help-kbd">Ctrl</span>+<span class="help-kbd">Z</span></td><td>Deshacer</td></tr>
+            <tr><td><span class="help-kbd">Ctrl</span>+<span class="help-kbd">Y</span></td><td>Rehacer</td></tr>
+            <tr><td><span class="help-kbd">Ctrl</span>+<span class="help-kbd">C</span></td><td>Copiar seleccion</td></tr>
+            <tr><td><span class="help-kbd">Ctrl</span>+<span class="help-kbd">V</span></td><td>Pegar</td></tr>
+            <tr><td><span class="help-kbd">Ctrl</span>+<span class="help-kbd">D</span></td><td>Duplicar seleccion</td></tr>
+            <tr><td><span class="help-kbd">R</span></td><td>Rotar 90 grados (con seleccion) / Herramienta habitacion (sin seleccion)</td></tr>
+            <tr><td><span class="help-kbd">Delete</span></td><td>Eliminar seleccion</td></tr>
+            <tr><td><span class="help-kbd">Escape</span></td><td>Deseleccionar todo</td></tr>
+            <tr><td><span class="help-kbd">Shift</span>+Click</td><td>Agregar/quitar de multi-seleccion</td></tr>
+            <tr><td><span class="help-kbd">Shift</span>+Arrastrar</td><td>Restringir movimiento a un eje (X o Y)</td></tr>
+            <tr><td>Doble click</td><td>Editar nombre del elemento</td></tr>
+            <tr><td>Click derecho</td><td>Menu contextual (duplicar, rotar, eliminar...)</td></tr>
+            <tr><td>Scroll</td><td>Zoom in/out</td></tr>
+            <tr><td><span class="help-kbd">Alt</span>+Click</td><td>Mover vista (pan)</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="help-sec">
+        <div class="help-hdr" onclick="togHelp(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          <span>Panel Derecho</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="help-cnt">
+          <p><b>Propiedades</b> - Al seleccionar un elemento, muestra su ancho, alto, area y posicion en metros. Puedes editar el nombre y cambiar el color de relleno.</p>
+          <p style="margin-top:6px"><b>Alineacion</b> - Cuando seleccionas 2 o mas elementos (Shift+click), aparecen botones para alinearlos (izquierda, centro, derecha) y distribuirlos uniformemente.</p>
+          <p style="margin-top:6px"><b>Imagen de Fondo</b> - Muestra los controles de opacidad si has importado una imagen de fondo.</p>
+          <p style="margin-top:6px"><b>Capas</b> - Checkboxes para ocultar/mostrar tipos de elementos: habitaciones, paredes, puertas, muebles, textos, cotas, escala.</p>
+          <p style="margin-top:6px"><b>Areas</b> - Lista automatica de todas las habitaciones con su area individual y el total en metros cuadrados.</p>
+          <p style="margin-top:6px"><b>Muebles</b> - Biblioteca de 18 muebles organizados por categoria (Sala, Dormitorio, Bano, Cocina, Simbolos). <b>Arrastra</b> cualquier mueble directamente al plano.</p>
+          <p style="margin-top:6px"><b>Colores</b> - Paleta rapida de 16 colores para aplicar al elemento seleccionado.</p>
+        </div>
+      </div>
+
+      <!-- PROJECTS & EXPORT -->
+      <div class="help-sec">
+        <div class="help-hdr" onclick="togHelp(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          <span>Proyectos y Exportacion</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="help-cnt">
+          <p><b>Nuevo (+)</b> - Abre el asistente con plantillas predefinidas o lienzo personalizado.</p>
+          <p style="margin-top:6px"><b>Abrir</b> - Abre la lista de proyectos guardados. Click en el nombre para cargar, flecha para descargar, X para eliminar.</p>
+          <p style="margin-top:6px"><b>Guardar</b> - Guarda el proyecto (Ctrl+S). El menu desplegable ofrece: Guardar como, Exportar/Importar archivo .json.</p>
+          <p style="margin-top:6px"><b>Reset</b> - Vuelve al plano original por defecto (3 habitaciones).</p>
+          <div style="height:8px"></div>
+          <p><b>Exportar SVG</b> - Descarga el plano como archivo SVG vectorial (editable en Illustrator, Inkscape, etc).</p>
+          <p style="margin-top:6px"><b>Exportar PNG</b> - Descarga como imagen de 1600x2000 pixeles.</p>
+          <p style="margin-top:6px"><b>Exportar PDF</b> - Abre una vista de impresion con escala configurable (1:50, 1:100), tabla de areas y metadatos. Usa "Guardar como PDF" del navegador.</p>
+          <div class="help-tip"><b>Tip:</b> Los proyectos se guardan en el almacenamiento local del navegador. Si limpias los datos del sitio, se perderan.</div>
+        </div>
+      </div>
+
+      <!-- FEATURES -->
+      <div class="help-sec">
+        <div class="help-hdr" onclick="togHelp(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span>Funciones Especiales</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="help-cnt">
+          <p><b>Snap inteligente</b> - Al mover un elemento, se alinea automaticamente con los bordes de otros elementos cercanos (guias verdes). Puertas y ventanas se adhieren a paredes.</p>
+          <p style="margin-top:6px"><b>Paredes inteligentes</b> - Al redimensionar una habitacion, si otra habitacion comparte el mismo borde, ambas se ajustan automaticamente.</p>
+          <p style="margin-top:6px"><b>Rotacion</b> - Selecciona un elemento y presiona <span class="help-kbd">R</span> para rotar 90 grados. Tambien puedes arrastrar el circulo azul que aparece arriba del elemento.</p>
+          <p style="margin-top:6px"><b>Lasso</b> - Click y arrastra en un area vacia para seleccionar multiples elementos con un rectangulo.</p>
+          <p style="margin-top:6px"><b>Imagen de fondo</b> - Boton "Fondo" importa una imagen (foto, scan) semitransparente para calcar encima. Ajusta la opacidad desde el panel derecho.</p>
+          <p style="margin-top:6px"><b>Pisos automaticos</b> - Las habitaciones muestran patrones de piso segun su nombre: madera para dormitorios/sala, azulejos para bano, tablero para cocina.</p>
+          <p style="margin-top:6px"><b>Reglas</b> - Los bordes del canvas muestran reglas con medidas en metros que se actualizan con el zoom.</p>
+          <p style="margin-top:6px"><b>Modo claro/oscuro</b> - Toggle con el icono de luna en la barra superior.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 <input type="file" id="finput" accept=".svg,.xml" style="display:none" onchange="onFile(event)">
+<input type="file" id="bginput" accept="image/*" style="display:none" onchange="onBgFile(event)">
+<input type="file" id="projinput" accept=".json" style="display:none" onchange="importProjectFile(event)">
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// BLOCK-BASED FLOOR PLAN EDITOR v4
-// Multi-select, rotation, wall-snap, copy/paste, drag&drop, inline edit
+// BLOCK-BASED FLOOR PLAN EDITOR v7
+// Projects, bg image, alignment, rulers, light/dark mode, visual upgrade
 // ═══════════════════════════════════════════════════════════════
 
 const $=id=>document.getElementById(id);
@@ -320,12 +690,14 @@ const S={
   hist:[],hi:-1,
   // Scale
   WPx:700,HPx:850,WM:8.5,HM:10.1,OX:50,OY:80,
-  snap:true,snapSz:10,gridOn:false,dimsOn:true,scaleOn:true,
+  snap:true,snapSz:10,gridOn:false,dimsOn:true,scaleOn:true,rulersOn:true,
+  bgImgData:null,bgOpacity:0.3,lightMode:false,
+  currentProject:null,dirty:false,
   mcb:null
 };
 // Convenience getter for primary selection
 Object.defineProperty(S,'sel',{get(){return S.sels[0]||null}});
-let svg,selG,gridG,dimG,liveG,snapG,blocksG,scaleG;
+let svg,selG,gridG,dimG,liveG,snapG,blocksG,scaleG,bgImgG;
 
 // ═══════════════════════════════════════════════════════════════
 // SCALE
@@ -336,11 +708,17 @@ const m2px=m=>(m/S.WM)*S.WPx;
 const m2py=m=>(m/S.HM)*S.HPx;
 function updScale(){S.WM=+$('sw').value||8.5;S.HM=+$('sh').value||10.1;updScaleDisp();if(S.sel)showProps(S.sel);drawGrid();updAutoDims()}
 function updScaleDisp(){$('sscale').textContent=`${S.WM}m x ${S.HM}m`}
+function calcGeometry(wm,hm){
+  const maxW=720,maxH=880,ar=wm/hm;
+  if(ar>=maxW/maxH){S.WPx=maxW;S.HPx=Math.round(maxW/ar)}
+  else{S.HPx=maxH;S.WPx=Math.round(maxH*ar)}
+  S.OX=Math.round((800-S.WPx)/2);S.OY=Math.round((1000-S.HPx)/2);
+}
 
 // ═══════════════════════════════════════════════════════════════
 // TRANSFORM
 // ═══════════════════════════════════════════════════════════════
-function applyTx(){wrap.style.transform=`translate(${S.px}px,${S.py}px) scale(${S.zoom})`;$('zlbl').textContent=Math.round(S.zoom*100)+'%'}
+function applyTx(){wrap.style.transform=`translate(${S.px}px,${S.py}px) scale(${S.zoom})`;$('zlbl').textContent=Math.round(S.zoom*100)+'%';drawRulers()}
 function zin(){sz(S.zoom*1.25)}function zout(){sz(S.zoom/1.25)}
 function sz(z,cx,cy){const o=S.zoom;S.zoom=Math.max(.05,Math.min(15,z));if(cx!=null){S.px=cx-(cx-S.px)*(S.zoom/o);S.py=cy-(cy-S.py)*(S.zoom/o)}applyTx()}
 function fit(){const w=canvas.clientWidth,h=canvas.clientHeight;S.zoom=Math.min(w/800,h/1000)*.88;S.px=(w-800*S.zoom)/2;S.py=(h-1000*S.zoom)/2;applyTx()}
@@ -357,13 +735,15 @@ function gPos(g){
 }
 function sPos(g,x,y){
   const rot=+g.getAttribute('data-rot')||0;
-  if(rot){
-    const mr=gMainRect(g);
-    const w=mr?+mr.getAttribute('width'):0,h=mr?+mr.getAttribute('height'):0;
-    g.setAttribute('transform',`translate(${x},${y}) rotate(${rot},${w/2},${h/2})`);
-  }else{
-    g.setAttribute('transform',`translate(${x},${y})`);
-  }
+  const fh=+g.getAttribute('data-fliph')||0;
+  const fv=+g.getAttribute('data-flipv')||0;
+  const mr=gMainRect(g);
+  const w=mr?+mr.getAttribute('width'):0,h=mr?+mr.getAttribute('height'):0;
+  let tf=`translate(${x},${y})`;
+  if(rot) tf+=` rotate(${rot},${w/2},${h/2})`;
+  if(fh) tf+=` translate(${w},0) scale(-1,1)`;
+  if(fv) tf+=` translate(0,${h}) scale(1,-1)`;
+  g.setAttribute('transform',tf);
 }
 function gRect(g){
   const r=g.querySelector('rect');
@@ -382,13 +762,23 @@ function mkRoom(x,y,w,h,fill,name,sub,txtColor){
   const g=ce('g');g.setAttribute('class','room-block');g.setAttribute('data-type','room');g.setAttribute('data-name',name);
   sPos(g,x,y);
   const r=ce('rect');r.setAttribute('x',0);r.setAttribute('y',0);r.setAttribute('width',w);r.setAttribute('height',h);
-  r.setAttribute('fill',fill);r.setAttribute('stroke','#555');r.setAttribute('stroke-width','2');r.setAttribute('class','room-rect');
+  r.setAttribute('fill',fill);r.setAttribute('stroke','#3a3a3a');r.setAttribute('stroke-width','3.5');r.setAttribute('class','room-rect');
+  r.setAttribute('filter','url(#roomShd)');
   g.appendChild(r);
-  const t=ce('text');t.setAttribute('x',w/2);t.setAttribute('y',h/2+(sub?-4:4));t.setAttribute('text-anchor','middle');
-  t.setAttribute('font-size',Math.min(17,w/8));t.setAttribute('fill',txtColor||'#555');t.setAttribute('font-weight','600');
+  // Floor tile pattern overlay (context-aware)
+  const nl=(name||'').toLowerCase();
+  let tileId='ftile';
+  if(nl.includes('bano')||nl.includes('baño'))tileId='fBath';
+  else if(nl.includes('cocina'))tileId='fKitchen';
+  else if(nl.includes('habitacion')||nl.includes('sala')||nl.includes('dormitorio')||nl.includes('comedor'))tileId='fWood';
+  const ft=ce('rect');ft.setAttribute('x',0);ft.setAttribute('y',0);ft.setAttribute('width',w);ft.setAttribute('height',h);
+  ft.setAttribute('fill','url(#'+tileId+')');ft.setAttribute('stroke','none');ft.setAttribute('class','room-tile');ft.setAttribute('pointer-events','none');
+  g.appendChild(ft);
+  const t=ce('text');t.setAttribute('x',w/2);t.setAttribute('y',h/2+(sub?-6:4));t.setAttribute('text-anchor','middle');
+  t.setAttribute('font-size',Math.min(18,w/7));t.setAttribute('fill',txtColor||'#3a3a3a');t.setAttribute('font-weight','700');
   t.setAttribute('font-family','Inter,Arial,sans-serif');t.setAttribute('class','room-label');t.textContent=name;
   g.appendChild(t);
-  if(sub){const s=ce('text');s.setAttribute('x',w/2);s.setAttribute('y',h/2+14);s.setAttribute('text-anchor','middle');
+  if(sub){const s=ce('text');s.setAttribute('x',w/2);s.setAttribute('y',h/2+13);s.setAttribute('text-anchor','middle');
     s.setAttribute('font-size','11');s.setAttribute('fill','#888');s.setAttribute('font-family','Inter,Arial,sans-serif');
     s.setAttribute('class','room-sub');s.textContent=sub;g.appendChild(s)}
   return g;
@@ -398,14 +788,14 @@ function mkWall(x,y,w,h,name){
   const g=ce('g');g.setAttribute('class','wall-block');g.setAttribute('data-type','wall');g.setAttribute('data-name',name||'Pared');
   sPos(g,x,y);
   const r=ce('rect');r.setAttribute('x',0);r.setAttribute('y',0);r.setAttribute('width',w);r.setAttribute('height',h);
-  r.setAttribute('fill','#b0b0b0');r.setAttribute('stroke','#777');r.setAttribute('stroke-width','1.5');
+  r.setAttribute('fill','#4a4a4a');r.setAttribute('stroke','#333');r.setAttribute('stroke-width','1');
   g.appendChild(r);
   const r2=ce('rect');r2.setAttribute('x',0);r2.setAttribute('y',0);r2.setAttribute('width',w);r2.setAttribute('height',h);
   r2.setAttribute('fill','url(#hatch)');r2.setAttribute('stroke','none');g.appendChild(r2);
   if(name&&(w>30||h>30)){const t=ce('text');
     const vert=h>w;
     t.setAttribute('x',w/2);t.setAttribute('y',h/2+4);t.setAttribute('text-anchor','middle');
-    t.setAttribute('font-size','10');t.setAttribute('fill','#555');t.setAttribute('font-weight','500');
+    t.setAttribute('font-size','10');t.setAttribute('fill','#ddd');t.setAttribute('font-weight','600');
     t.setAttribute('font-family','Inter,Arial,sans-serif');t.setAttribute('class','room-label');
     if(vert)t.setAttribute('transform',`rotate(-90,${w/2},${h/2})`);
     t.textContent=name;g.appendChild(t)}
@@ -416,17 +806,24 @@ function mkDoor(x,y,w,horiz){
   const g=ce('g');g.setAttribute('class','door-block');g.setAttribute('data-type','door');
   sPos(g,x,y);
   const thick=10;
-  const r=ce('rect');
-  r.setAttribute('x',0);r.setAttribute('y',0);
+  const r=ce('rect');r.setAttribute('x',0);r.setAttribute('y',0);
   r.setAttribute('width',horiz?w:thick);r.setAttribute('height',horiz?thick:w);
-  r.setAttribute('fill','#e53935');r.setAttribute('rx','2');
+  r.setAttribute('fill','transparent');r.setAttribute('stroke','none');
   g.appendChild(r);
-  const arc=ce('path');
-  if(horiz){arc.setAttribute('d',`M0,${thick} Q0,${-w*.4} ${w*.7},${-w*.4}`)}
-  else{arc.setAttribute('d',`M${thick},0 Q${thick+w*.4},0 ${thick+w*.4},${w*.7}`)}
-  arc.setAttribute('fill','none');arc.setAttribute('stroke','#e53935');arc.setAttribute('stroke-width','1.2');arc.setAttribute('stroke-dasharray','3,2');
-  g.appendChild(arc);
+  buildDoorParts(g,w,thick,horiz);
   return g;
+}
+function buildDoorParts(g,w,thick,horiz){
+  const leaf=ce('line');
+  if(horiz){leaf.setAttribute('x1',0);leaf.setAttribute('y1',thick);leaf.setAttribute('x2',w);leaf.setAttribute('y2',thick)}
+  else{leaf.setAttribute('x1',thick);leaf.setAttribute('y1',0);leaf.setAttribute('x2',thick);leaf.setAttribute('y2',w)}
+  leaf.setAttribute('stroke','#333');leaf.setAttribute('stroke-width','2');leaf.setAttribute('class','door-part');
+  g.appendChild(leaf);
+  const arc=ce('path');
+  if(horiz){arc.setAttribute('d',`M${w},${thick} A${w},${w} 0 0,1 0,${thick-w}`)}
+  else{arc.setAttribute('d',`M${thick},${w} A${w},${w} 0 0,0 ${thick+w},0`)}
+  arc.setAttribute('fill','none');arc.setAttribute('stroke','#333');arc.setAttribute('stroke-width','0.8');arc.setAttribute('class','door-part');
+  g.appendChild(arc);
 }
 
 function mkWindow(x,y,w,horiz){
@@ -435,26 +832,34 @@ function mkWindow(x,y,w,horiz){
   const thick=8;
   const r=ce('rect');r.setAttribute('x',0);r.setAttribute('y',0);
   r.setAttribute('width',horiz?w:thick);r.setAttribute('height',horiz?thick:w);
-  r.setAttribute('fill','#64b5f6');r.setAttribute('rx','2');g.appendChild(r);
-  const r2=ce('rect');r2.setAttribute('x',1);r2.setAttribute('y',1);
-  r2.setAttribute('width',horiz?w-2:thick-2);r2.setAttribute('height',horiz?thick-2:w-2);
-  r2.setAttribute('fill','none');r2.setAttribute('stroke','#42a5f5');r2.setAttribute('stroke-width','1');r2.setAttribute('rx','1');g.appendChild(r2);
-  const l=ce('line');
-  if(horiz){l.setAttribute('x1',w/2);l.setAttribute('y1',0);l.setAttribute('x2',w/2);l.setAttribute('y2',thick)}
-  else{l.setAttribute('x1',0);l.setAttribute('y1',w/2);l.setAttribute('x2',thick);l.setAttribute('y2',w/2)}
-  l.setAttribute('stroke','#42a5f5');l.setAttribute('stroke-width','1');g.appendChild(l);
+  r.setAttribute('fill','transparent');r.setAttribute('stroke','none');
+  g.appendChild(r);
+  buildWinParts(g,w,thick,horiz);
   return g;
+}
+function buildWinParts(g,w,thick,horiz){
+  const l1=ce('line'),l2=ce('line'),lg=ce('line');
+  if(horiz){
+    sa(l1,{x1:0,y1:0,x2:w,y2:0});sa(l2,{x1:0,y1:thick,x2:w,y2:thick});
+    sa(lg,{x1:0,y1:thick/2,x2:w,y2:thick/2});
+  }else{
+    sa(l1,{x1:0,y1:0,x2:0,y2:w});sa(l2,{x1:thick,y1:0,x2:thick,y2:w});
+    sa(lg,{x1:thick/2,y1:0,x2:thick/2,y2:w});
+  }
+  [l1,l2].forEach(l=>{l.setAttribute('stroke','#333');l.setAttribute('stroke-width','2');l.setAttribute('class','win-part')});
+  lg.setAttribute('stroke','#333');lg.setAttribute('stroke-width','0.6');lg.setAttribute('class','win-part');
+  g.appendChild(l1);g.appendChild(l2);g.appendChild(lg);
 }
 
 function mkFurn(x,y,w,h,fill,name){
   const g=ce('g');g.setAttribute('class','furn-block');g.setAttribute('data-type','furniture');g.setAttribute('data-name',name);g.setAttribute('data-furn',name);
   sPos(g,x,y);
   const r=ce('rect');r.setAttribute('x',0);r.setAttribute('y',0);r.setAttribute('width',w);r.setAttribute('height',h);
-  r.setAttribute('fill',fill);r.setAttribute('stroke','#666');r.setAttribute('stroke-width','1.5');r.setAttribute('rx','4');
+  r.setAttribute('fill',fill);r.setAttribute('stroke','#555');r.setAttribute('stroke-width','1');r.setAttribute('rx','2');
   g.appendChild(r);
   addFurnShape(g,name,w,h);
   const t=ce('text');t.setAttribute('x',w/2);t.setAttribute('y',h/2+4);t.setAttribute('text-anchor','middle');
-  t.setAttribute('font-size',Math.min(11,w/5));t.setAttribute('fill','#fff');t.setAttribute('font-weight','600');
+  t.setAttribute('font-size',Math.min(11,w/5));t.setAttribute('fill','#333');t.setAttribute('font-weight','600');
   t.setAttribute('font-family','Inter,Arial,sans-serif');t.setAttribute('class','room-label');t.textContent=name;
   g.appendChild(t);
   return g;
@@ -464,102 +869,114 @@ function addFurnShape(g,name,w,h){
   const ar=(x,y,rw,rh,fill,opts)=>{const e=ce('rect');sa(e,Object.assign({x,y,width:rw,height:rh,fill,class:'furn-detail'},opts||{}));g.appendChild(e)};
   const ac=(cx,cy,r,fill,opts)=>{const e=ce('circle');sa(e,Object.assign({cx,cy,r,fill,class:'furn-detail'},opts||{}));g.appendChild(e)};
   const ae=(cx,cy,rx,ry,fill,opts)=>{const e=ce('ellipse');sa(e,Object.assign({cx,cy,rx,ry,fill,class:'furn-detail'},opts||{}));g.appendChild(e)};
-  const al=(x1,y1,x2,y2,opts)=>{const e=ce('line');sa(e,Object.assign({x1,y1,x2,y2,stroke:'rgba(0,0,0,.15)','stroke-width':'0.8',class:'furn-detail'},opts||{}));g.appendChild(e)};
+  const al=(x1,y1,x2,y2,opts)=>{const e=ce('line');sa(e,Object.assign({x1,y1,x2,y2,stroke:'#333','stroke-width':'0.8',class:'furn-detail'},opts||{}));g.appendChild(e)};
   const ap=(d,fill,opts)=>{const e=ce('path');sa(e,Object.assign({d,fill,class:'furn-detail'},opts||{}));g.appendChild(e)};
   switch(name){
     case 'Sofa':
-      ar(0,0,w,h*.28,'rgba(0,0,0,.1)',{rx:3});
-      ar(0,0,w*.09,h,'rgba(0,0,0,.07)',{rx:2});
-      ar(w-w*.09,0,w*.09,h,'rgba(0,0,0,.07)',{rx:2});
-      al(w/3,h*.32,w/3,h*.92);al(w*2/3,h*.32,w*2/3,h*.92);
+      ar(0,0,w,h*.22,'none',{rx:2,stroke:'#333','stroke-width':'1'});
+      ar(0,0,w*.08,h,'none',{rx:2,stroke:'#333','stroke-width':'1'});
+      ar(w*.92,0,w*.08,h,'none',{rx:2,stroke:'#333','stroke-width':'1'});
+      {const sw2=(w-w*.16)/3;for(let i=1;i<3;i++){al(w*.08+i*sw2,h*.25,w*.08+i*sw2,h*.95,{stroke:'#555','stroke-width':'.5'})}}
       break;
     case 'Mesa':
-      ae(w/2,h/2,w*.4,h*.4,'rgba(255,255,255,.15)',{stroke:'rgba(0,0,0,.08)','stroke-width':'.6'});
+      ae(w/2,h/2,w*.42,h*.42,'none',{stroke:'#333','stroke-width':'.8'});
       break;
     case 'Cama':
-      ar(w*.06,h*.03,w*.38,h*.11,'rgba(255,255,255,.4)',{rx:4,stroke:'rgba(0,0,0,.1)','stroke-width':'.5'});
-      ar(w*.56,h*.03,w*.38,h*.11,'rgba(255,255,255,.4)',{rx:4,stroke:'rgba(0,0,0,.1)','stroke-width':'.5'});
-      al(w*.04,h*.2,w*.96,h*.2,{stroke:'rgba(0,0,0,.08)','stroke-width':'1'});
-      ar(w*.04,h*.22,w*.92,h*.74,'rgba(255,255,255,.08)',{rx:2,stroke:'rgba(0,0,0,.04)','stroke-width':'.5'});
+      ar(0,0,w,h*.04,'#555',{rx:1});
+      ar(w*.06,h*.06,w*.40,h*.12,'none',{rx:3,stroke:'#333','stroke-width':'.8'});
+      ar(w*.54,h*.06,w*.40,h*.12,'none',{rx:3,stroke:'#333','stroke-width':'.8'});
+      al(w*.04,h*.28,w*.96,h*.28,{stroke:'#555','stroke-width':'.6'});
       break;
     case 'Inodoro':
-      ar(w*.15,0,w*.7,h*.3,'rgba(255,255,255,.35)',{rx:3,stroke:'rgba(0,0,0,.15)','stroke-width':'.8'});
-      ae(w/2,h*.65,w*.4,h*.3,'rgba(255,255,255,.3)',{stroke:'rgba(0,0,0,.15)','stroke-width':'.8'});
-      ae(w/2,h*.68,w*.22,h*.18,'rgba(255,255,255,.2)',{stroke:'rgba(0,0,0,.08)','stroke-width':'.5'});
+      ar(w*.1,h*.02,w*.8,h*.28,'none',{rx:2,stroke:'#333','stroke-width':'1'});
+      ap(`M${w*.12},${h*.98} L${w*.12},${h*.45} Q${w*.12},${h*.32} ${w*.5},${h*.32} Q${w*.88},${h*.32} ${w*.88},${h*.45} L${w*.88},${h*.98}`,'none',{stroke:'#333','stroke-width':'1'});
       break;
     case 'Ducha':
-      ac(w/2,h/2,Math.min(w,h)*.08,'rgba(0,0,0,.12)');
-      al(0,0,w,h,{stroke:'rgba(0,0,0,.05)','stroke-width':'.5'});
-      al(w,0,0,h,{stroke:'rgba(0,0,0,.05)','stroke-width':'.5'});
-      ac(w*.15,h*.15,Math.min(w,h)*.1,'none',{stroke:'rgba(0,0,0,.12)','stroke-width':'.8'});
-      ar(w*.08,h*.08,Math.min(w,h)*.14,Math.min(w,h)*.14,'none',{stroke:'rgba(0,0,0,.06)','stroke-width':'.5'});
+      al(w*.05,h*.05,w*.95,h*.95,{stroke:'#555','stroke-width':'.8'});
+      al(w*.95,h*.05,w*.05,h*.95,{stroke:'#555','stroke-width':'.8'});
+      ac(w/2,h/2,Math.min(w,h)*.05,'none',{stroke:'#333','stroke-width':'.8'});
       break;
     case 'Lavabo':
-      ae(w/2,h*.55,w*.4,h*.35,'rgba(255,255,255,.3)',{stroke:'rgba(0,0,0,.15)','stroke-width':'.8'});
-      ac(w/2,h*.6,Math.min(w,h)*.06,'rgba(0,0,0,.12)');
-      ar(w*.35,0,w*.3,h*.2,'rgba(0,0,0,.08)',{rx:2,stroke:'rgba(0,0,0,.06)','stroke-width':'.5'});
+      ap(`M${w*.05},${h*.05} L${w*.95},${h*.05} L${w*.95},${h*.4} Q${w*.95},${h*.92} ${w*.5},${h*.92} Q${w*.05},${h*.92} ${w*.05},${h*.4} Z`,'none',{stroke:'#333','stroke-width':'1'});
+      ac(w*.5,h*.55,Math.min(w,h)*.06,'none',{stroke:'#333','stroke-width':'.8'});
+      ac(w*.35,h*.2,Math.min(w,h)*.04,'#333',{});
+      ac(w*.65,h*.2,Math.min(w,h)*.04,'#333',{});
       break;
     case 'Estufa':
       [[.3,.3],[.7,.3],[.3,.7],[.7,.7]].forEach(([px,py])=>{
-        const cr=Math.min(w,h)*.15;
-        ac(w*px,h*py,cr,'none',{stroke:'rgba(0,0,0,.15)','stroke-width':'1'});
-        ac(w*px,h*py,cr*.45,'none',{stroke:'rgba(0,0,0,.08)','stroke-width':'.6'});
+        const cr=Math.min(w,h)*.16;
+        ac(w*px,h*py,cr,'none',{stroke:'#333','stroke-width':'1'});
+        ac(w*px,h*py,cr*.5,'none',{stroke:'#555','stroke-width':'.6'});
       });
       break;
     case 'Nevera':
-      al(w*.05,h*.38,w*.95,h*.38,{stroke:'rgba(0,0,0,.15)','stroke-width':'1'});
-      al(w*.85,h*.1,w*.85,h*.32,{stroke:'rgba(0,0,0,.2)','stroke-width':'1.5','stroke-linecap':'round'});
-      al(w*.85,h*.44,w*.85,h*.9,{stroke:'rgba(0,0,0,.2)','stroke-width':'1.5','stroke-linecap':'round'});
+      al(w*.05,h*.35,w*.95,h*.35,{stroke:'#333','stroke-width':'1'});
+      al(w*.85,h*.12,w*.85,h*.28,{stroke:'#333','stroke-width':'1.2','stroke-linecap':'round'});
+      al(w*.85,h*.42,w*.85,h*.88,{stroke:'#333','stroke-width':'1.2','stroke-linecap':'round'});
       break;
     case 'Gran Isla':
-      ar(w*.06,h*.08,w*.4,h*.84,'rgba(255,255,255,.15)',{rx:2,stroke:'rgba(0,0,0,.06)','stroke-width':'.5'});
-      ae(w*.68,h*.3,w*.16,h*.08,'rgba(255,255,255,.2)',{stroke:'rgba(0,0,0,.1)','stroke-width':'.6'});
-      ac(w*.68,h*.3,Math.min(w,h)*.03,'rgba(0,0,0,.1)');
-      al(w*.06,h*.55,w*.94,h*.55,{stroke:'rgba(0,0,0,.06)','stroke-width':'.5'});
+      ar(w*.06,h*.06,w*.88,h*.88,'none',{rx:2,stroke:'#555','stroke-width':'.6'});
+      ae(w*.5,h*.3,w*.15,h*.08,'none',{stroke:'#333','stroke-width':'.8'});
+      ac(w*.5,h*.3,Math.min(w,h)*.02,'#333',{});
       break;
     case 'Silla':
-      ac(w/2,h*.55,Math.min(w,h)*.38,'rgba(255,255,255,.2)',{stroke:'rgba(0,0,0,.12)','stroke-width':'.8'});
-      ar(w*.15,0,w*.7,h*.22,'rgba(0,0,0,.1)',{rx:2});
+      ar(w*.12,h*.22,w*.76,h*.72,'none',{rx:2,stroke:'#333','stroke-width':'.8'});
+      ar(w*.08,h*.02,w*.84,h*.16,'none',{rx:2,stroke:'#333','stroke-width':'1'});
       break;
     case 'TV':
-      ar(w*.02,h*.08,w*.96,h*.84,'rgba(0,0,0,.15)',{rx:1,stroke:'rgba(0,0,0,.1)','stroke-width':'.5'});
-      ar(w*.4,h*.85,w*.2,h*.15,'rgba(0,0,0,.08)',{rx:1});
+      ar(w*.02,h*.1,w*.96,h*.55,'none',{rx:1,stroke:'#333','stroke-width':'.8'});
+      ar(w*.4,h*.7,w*.2,h*.25,'none',{rx:1,stroke:'#555','stroke-width':'.6'});
+      break;
+    case 'Chimenea':
+      // Firebox opening (arch)
+      ap(`M${w*.12},${h*.98} L${w*.12},${h*.35} Q${w*.12},${h*.08} ${w*.5},${h*.08} Q${w*.88},${h*.08} ${w*.88},${h*.35} L${w*.88},${h*.98}`,'none',{stroke:'#333','stroke-width':'1'});
+      // Hearth line at bottom
+      al(w*.05,h*.92,w*.95,h*.92,{stroke:'#333','stroke-width':'1'});
       break;
     case 'Escritorio':
-      ar(0,0,w,h*.18,'rgba(0,0,0,.1)',{rx:2});
-      ar(w*.05,h*.6,w*.45,h*.32,'rgba(255,255,255,.12)',{rx:1,stroke:'rgba(0,0,0,.06)','stroke-width':'.5'});
-      al(w*.05,h*.76,w*.5,h*.76,{stroke:'rgba(0,0,0,.05)'});
+      ar(0,0,w,h*.12,'none',{rx:1,stroke:'#333','stroke-width':'1'});
+      ar(w*.05,h*.55,w*.42,h*.38,'none',{rx:1,stroke:'#555','stroke-width':'.6'});
+      al(w*.15,h*.74,w*.37,h*.74,{stroke:'#555','stroke-width':'.5'});
       break;
     case 'Lavadora':
-      ac(w/2,h*.52,Math.min(w,h)*.35,'rgba(255,255,255,.2)',{stroke:'rgba(0,0,0,.12)','stroke-width':'.8'});
-      ac(w/2,h*.52,Math.min(w,h)*.2,'rgba(255,255,255,.1)',{stroke:'rgba(0,0,0,.06)','stroke-width':'.5'});
-      ar(w*.1,h*.02,w*.3,h*.12,'rgba(0,0,0,.06)',{rx:1});
+      ac(w/2,h*.55,Math.min(w,h)*.32,'none',{stroke:'#333','stroke-width':'1'});
+      ac(w/2,h*.55,Math.min(w,h)*.18,'none',{stroke:'#555','stroke-width':'.6'});
+      ar(w*.1,h*.03,w*.3,h*.1,'none',{rx:1,stroke:'#555','stroke-width':'.6'});
       break;
     case 'Bañera':
-      ae(w/2,h/2,w*.42,h*.44,'rgba(255,255,255,.25)',{stroke:'rgba(0,0,0,.12)','stroke-width':'.8'});
-      ae(w/2,h/2,w*.3,h*.34,'rgba(255,255,255,.1)',{stroke:'rgba(0,0,0,.06)','stroke-width':'.5'});
-      ac(w/2,h*.18,Math.min(w,h)*.04,'rgba(0,0,0,.1)');
+      ae(w/2,h/2,w*.38,h*.42,'none',{stroke:'#333','stroke-width':'1'});
+      ac(w*.5,h*.15,Math.min(w,h)*.03,'#333',{});
       break;
     case 'Armario':
-      al(w/2,h*.05,w/2,h*.95,{stroke:'rgba(0,0,0,.12)','stroke-width':'.8'});
-      ac(w*.42,h/2,Math.min(w,h)*.05,'rgba(0,0,0,.1)');
-      ac(w*.58,h/2,Math.min(w,h)*.05,'rgba(0,0,0,.1)');
+      al(w/2,h*.05,w/2,h*.95,{stroke:'#333','stroke-width':'.8'});
+      ac(w*.42,h/2,Math.min(w,h)*.04,'#333',{});
+      ac(w*.58,h/2,Math.min(w,h)*.04,'#333',{});
       break;
     case 'Mesa de noche':
-      al(w*.08,h*.48,w*.92,h*.48,{stroke:'rgba(0,0,0,.12)','stroke-width':'.8'});
-      ac(w/2,h*.26,Math.min(w,h)*.06,'rgba(0,0,0,.08)');
+      al(w*.08,h*.48,w*.92,h*.48,{stroke:'#333','stroke-width':'.8'});
+      ac(w/2,h*.26,Math.min(w,h)*.04,'#333',{});
       break;
     case 'Escalera':
-      {const steps=8;for(let i=1;i<steps;i++){al(w*.05,h*i/steps,w*.95,h*i/steps,{stroke:'rgba(0,0,0,.12)','stroke-width':'.6'});}
-      ap(`M${w*.35},${h*.35}L${w*.5},${h*.12}L${w*.65},${h*.35}`,'none',{stroke:'rgba(0,0,0,.2)','stroke-width':'1.2'});}
+      {const steps=8;
+       for(let i=0;i<=steps;i++){al(w*.05,h*i/steps,w*.95,h*i/steps,{stroke:'#333','stroke-width':'.6'})}
+       al(w*.05,h*.65,w*.95,h*.65,{stroke:'#333','stroke-width':'1.5'});
+       al(w*.5,h*.85,w*.5,h*.15,{stroke:'#333','stroke-width':'1'});
+       ap(`M${w*.38},${h*.25} L${w*.5},${h*.1} L${w*.62},${h*.25}`,'none',{stroke:'#333','stroke-width':'1','stroke-linejoin':'miter'});
+      }
       break;
     case 'Columna':
-      ac(w/2,h/2,Math.min(w,h)*.4,'rgba(0,0,0,.25)',{stroke:'rgba(0,0,0,.2)','stroke-width':'1'});
-      al(w*.15,h/2,w*.85,h/2,{stroke:'rgba(255,255,255,.15)','stroke-width':'.5'});
-      al(w/2,h*.15,w/2,h*.85,{stroke:'rgba(255,255,255,.15)','stroke-width':'.5'});
+      ar(w*.08,h*.08,w*.84,h*.84,'#333',{stroke:'#222','stroke-width':'1'});
+      al(w*.08,h*.08,w*.92,h*.92,{stroke:'#555','stroke-width':'.5'});
+      al(w*.92,h*.08,w*.08,h*.92,{stroke:'#555','stroke-width':'.5'});
       break;
     case 'Flecha Norte':
-      ap(`M${w/2},${h*.05}L${w*.78},${h*.65}L${w/2},${h*.5}L${w*.22},${h*.65}Z`,'rgba(0,0,0,.2)',{stroke:'rgba(0,0,0,.15)','stroke-width':'.8'});
+      ap(`M${w/2},${h*.05} L${w*.75},${h*.55} L${w/2},${h*.42} L${w*.25},${h*.55} Z`,'none',{stroke:'#333','stroke-width':'.8'});
+      ap(`M${w/2},${h*.05} L${w*.75},${h*.55} L${w/2},${h*.42} Z`,'#222',{stroke:'none'});
+      {const t=ce('text');t.setAttribute('x',w/2);t.setAttribute('y',h*.82);
+       t.setAttribute('text-anchor','middle');t.setAttribute('font-size',Math.min(w,h)*.35);
+       t.setAttribute('fill','#333');t.setAttribute('font-weight','700');
+       t.setAttribute('font-family','Inter,Arial,sans-serif');t.setAttribute('class','furn-detail');
+       t.textContent='N';g.appendChild(t)}
       break;
   }
 }
@@ -578,15 +995,24 @@ function mkLabel(x,y,text,size,color){
 // BUILD DEFAULT PLAN
 // ═══════════════════════════════════════════════════════════════
 function buildPlan(){
+  S.WPx=700;S.HPx=850;S.OX=50;S.OY=80;
   wrap.innerHTML=`<svg id="msvg" viewBox="0 0 800 1000" xmlns="${NS}">
   <defs>
     <marker id="as" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto"><path d="M8,0L0,4L8,8" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--pink')}" stroke-width="1.5"/></marker>
     <marker id="ae" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0L8,4L0,8" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--pink')}" stroke-width="1.5"/></marker>
     <filter id="shd" x="-2%" y="-2%" width="104%" height="104%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity=".06"/></filter>
-    <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse"><line x1="0" y1="6" x2="6" y2="0" stroke="#888" stroke-width=".5" opacity=".25"/></pattern>
+    <filter id="planShd" x="-3%" y="-2%" width="106%" height="106%"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000" flood-opacity=".12"/></filter>
+    <filter id="roomShd" x="-1%" y="-1%" width="102%" height="102%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity=".06"/></filter>
+    <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse"><line x1="0" y1="6" x2="6" y2="0" stroke="#bbb" stroke-width=".5" opacity=".35"/></pattern>
+    <pattern id="ftile" width="18" height="18" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="18" height="18" fill="none" stroke="rgba(0,0,0,.03)" stroke-width=".3"/></pattern>
+    <pattern id="fBath" width="10" height="10" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="10" height="10" fill="none" stroke="rgba(0,0,0,.06)" stroke-width=".3"/></pattern>
+    <pattern id="fKitchen" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="20" height="20" fill="none" stroke="rgba(0,0,0,.04)" stroke-width=".4"/></pattern>
+    <pattern id="fWood" width="40" height="8" patternUnits="userSpaceOnUse"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="rgba(0,0,0,.05)" stroke-width=".4"/><line x1="20" y1="0" x2="20" y2="8" stroke="rgba(0,0,0,.03)" stroke-width=".2"/></pattern>
+    <pattern id="wallFill" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#3a3a3a"/><line x1="0" y1="4" x2="4" y2="0" stroke="#555" stroke-width=".4" opacity=".3"/></pattern>
   </defs>
-  <rect x="0" y="0" width="800" height="1000" fill="#fafbfc" rx="3"/>
+  <rect x="0" y="0" width="800" height="1000" fill="#f0ede6" rx="3"/>
   <g id="gridG" style="display:none"></g>
+  <g id="bgImgG"></g>
   <g id="blocksG"></g>
   <g id="scaleG"></g>
   <g id="dimG"></g>
@@ -595,7 +1021,7 @@ function buildPlan(){
   <g id="selG"></g>
 </svg>`;
   svg=wrap.querySelector('svg');svg.style.width='800px';svg.style.height='1000px';
-  gridG=svg.querySelector('#gridG');blocksG=svg.querySelector('#blocksG');scaleG=svg.querySelector('#scaleG');
+  gridG=svg.querySelector('#gridG');bgImgG=svg.querySelector('#bgImgG');blocksG=svg.querySelector('#blocksG');scaleG=svg.querySelector('#scaleG');
   dimG=svg.querySelector('#dimG');snapG=svg.querySelector('#snapG');
   liveG=svg.querySelector('#liveG');selG=svg.querySelector('#selG');
 
@@ -604,19 +1030,19 @@ function buildPlan(){
   const bnd=ce('g');bnd.setAttribute('class','wall-block');bnd.setAttribute('data-type','boundary');bnd.setAttribute('data-name','Perimetro');
   sPos(bnd,50,80);
   const br=ce('rect');br.setAttribute('x',0);br.setAttribute('y',0);br.setAttribute('width',700);br.setAttribute('height',850);
-  br.setAttribute('fill','none');br.setAttribute('stroke','#2d3436');br.setAttribute('stroke-width','5');bnd.appendChild(br);
+  br.setAttribute('fill','none');br.setAttribute('stroke','#2d2d2d');br.setAttribute('stroke-width','8');br.setAttribute('filter','url(#planShd)');bnd.appendChild(br);
   blocksG.appendChild(bnd);
 
   const rooms=[
-    [50,80,350,300,'#f0f3f5','Habitacion 2','(Futuro Estudio)','#555'],
-    [400,80,350,300,'#eaecf0','Habitacion 1 (Principal)',null,'#555'],
-    [550,380,200,120,'#e3f2fd','Bano Privado',null,'#1565c0'],
-    [550,500,200,120,'#e3f2fd','Bano Social',null,'#1565c0'],
-    [550,620,200,130,'#e0f7fa','Patio / Lavadero',null,'#00838f'],
-    [50,380,280,250,'#f3e5f5','Habitacion 3 (Belen)',null,'#7b1fa2'],
-    [370,380,180,250,'#fafafa','Pasillo',null,'#aaa'],
-    [50,630,500,300,'#fffde7','Sala - Comedor',null,'#f57f17'],
-    [550,750,200,180,'#ffebee','Cocina',null,'#c62828'],
+    [50,80,350,300,'#f5f2ed','Habitacion 2','(Futuro Estudio)','#4a4a4a'],
+    [400,80,350,300,'#f2f0eb','Habitacion 1 (Principal)',null,'#4a4a4a'],
+    [550,380,200,120,'#eaf2f5','Bano Privado',null,'#3a6b8a'],
+    [550,500,200,120,'#eaf2f5','Bano Social',null,'#3a6b8a'],
+    [550,620,200,130,'#edf5ef','Patio / Lavadero',null,'#3a7a5a'],
+    [50,380,280,250,'#f3eef5','Habitacion 3 (Belen)',null,'#5a3a6a'],
+    [370,380,180,250,'#f7f6f3','Pasillo',null,'#999'],
+    [50,630,500,300,'#f5f3ec','Sala - Comedor',null,'#7a6830'],
+    [550,750,200,180,'#f5edec','Cocina',null,'#8a3a3a'],
   ];
   rooms.forEach(r=>blocksG.appendChild(mkRoom(...r)));
   blocksG.appendChild(mkWall(330,380,40,250,'Muro Closet'));
@@ -625,7 +1051,7 @@ function buildPlan(){
   blocksG.appendChild(mkWindow(605,76,90,true));
   blocksG.appendChild(mkWindow(46,685,140,false));
   blocksG.appendChild(mkDoor(405,925,70,true));
-  blocksG.appendChild(mkLabel(440,965,'PUERTA ENTRADA',12,'#e53935'));
+  blocksG.appendChild(mkLabel(440,965,'PUERTA ENTRADA',12,'#3a3a3a'));
   blocksG.appendChild(mkFurn(455,785,75,110,'#ffca28','Gran Isla'));
 }
 
@@ -640,9 +1066,9 @@ function updAutoDims(){
     const rc=gRect(g);if(!rc||rc.w<40||rc.h<40)return;
     const mw=px2mx(rc.w).toFixed(2),mh=px2my(rc.h).toFixed(2);
     const dt=ce('text');dt.setAttribute('class','room-dims');
-    dt.setAttribute('x',rc.x+rc.w-6);dt.setAttribute('y',rc.y+rc.h-6);
+    dt.setAttribute('x',rc.x+rc.w-6);dt.setAttribute('y',rc.y+rc.h-8);
     dt.setAttribute('text-anchor','end');dt.setAttribute('font-size','10');
-    dt.setAttribute('fill','rgba(0,0,0,.25)');dt.setAttribute('font-family','Inter,Arial,sans-serif');
+    dt.setAttribute('fill','rgba(0,0,0,.3)');dt.setAttribute('font-family','Inter,Arial,sans-serif');dt.setAttribute('font-weight','500');
     dt.textContent=`${mw} x ${mh}m`;
     dimG.appendChild(dt);
   });
@@ -658,11 +1084,13 @@ function setup(){
   window.addEventListener('mousemove',onMv);
   window.addEventListener('mouseup',onUp);
   document.addEventListener('keydown',onKy);
-  document.addEventListener('click',()=>ctx.classList.remove('vis'));
+  document.addEventListener('click',e=>{ctx.classList.remove('vis');if(!e.target.closest('.save-wrap'))closeSaveDD()});
   canvas.addEventListener('dblclick',onDbl);
   // Drag & drop from library
   canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
   canvas.addEventListener('drop',onDrop);
+  // Auto-save every 30 seconds if dirty
+  setInterval(()=>{if(S.dirty&&S.currentProject){saveProjectByName(S.currentProject);toast('Auto-guardado','ok')}},30000);
   $('minput').addEventListener('keydown',e=>{if(e.key==='Enter')modalOk();if(e.key==='Escape')modalNo()});
 }
 
@@ -684,7 +1112,7 @@ function onMv(e){
   if(S.panning){S.px=e.clientX-S.ps.x;S.py=e.clientY-S.ps.y;applyTx();return}
   if(S.rot){rotMv(p);return}
   if(S.lasso&&S.lassoEl){lassoMv(p);return}
-  if(S.drag&&S.sels.length>0){dragMv(p);return}
+  if(S.drag&&S.sels.length>0){dragMv(p,e.shiftKey);return}
   if(S.rsz&&S.sels.length>0){rszMv(p);return}
   if(S.draw&&S.drawEl){drawMv(p);return}
 }
@@ -705,13 +1133,16 @@ function onKy(e){
   if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();delSel()}
   else if(e.key==='z'&&c&&!e.shiftKey){e.preventDefault();undo()}
   else if((e.key==='y'&&c)||(e.key==='z'&&c&&e.shiftKey)){e.preventDefault();redo()}
+  else if(e.key==='s'&&c){e.preventDefault();saveProject()}
   else if(e.key==='d'&&c){e.preventDefault();dup()}
   // Copy/Paste
   else if(e.key==='c'&&c){e.preventDefault();clipCopy()}
   else if(e.key==='v'&&c){e.preventDefault();clipPaste()}
   else if(e.key==='Escape'){desel();cancelDraw();S.dimPt=null}
-  // R for rotation when selected, else room tool
+  // R for rotation, H for flip horizontal, V for flip vertical (when selected)
   else if(e.key==='r'&&!c&&S.sels.length>0){e.preventDefault();rot90()}
+  else if(e.key==='h'&&!c&&S.sels.length>0){e.preventDefault();flipH()}
+  else if(e.key==='v'&&!c&&S.sels.length>0){e.preventDefault();flipV()}
   else if(!c){const m={v:'select',h:'pan',r:'room',w:'wall',d:'door',n:'window',t:'text',m:'dim',e:'eraser'};if(m[e.key]){e.preventDefault();setT(m[e.key])}}
 }
 
@@ -790,7 +1221,7 @@ function selToggle(g){
   $('propsec').style.display='block';
 }
 
-function desel(){S.sels=[];selG.innerHTML='';liveG.innerHTML='';snapG.innerHTML='';$('propsec').style.display='none'}
+function desel(){S.sels=[];selG.innerHTML='';liveG.innerHTML='';snapG.innerHTML='';$('propsec').style.display='none';$('alignsec').style.display='none'}
 
 // ═══════════════════════════════════════════════════════════════
 // LASSO SELECTION
@@ -876,6 +1307,7 @@ function drawSelHandles(){
   rc2.setAttribute('r',rhs);rc2.setAttribute('class','rot-h');selG.appendChild(rc2);
 }
 
+
 function showLive(rc){
   liveG.innerHTML='';
   const mw=px2mx(rc.w),mh=px2my(rc.h);
@@ -920,6 +1352,38 @@ function rot90(){
   });
   drawSelHandles();pushH();ctx.classList.remove('vis');
   toast('Rotado 90°','ok');
+}
+function flipH(){
+  if(S.sels.length===0)return;
+  S.sels.forEach(g=>{
+    const cur=+g.getAttribute('data-fliph')||0;
+    g.setAttribute('data-fliph',cur?0:1);
+    const pos=gPos(g);sPos(g,pos.x,pos.y);
+    // Flip label text back so it stays readable
+    g.querySelectorAll('.room-label').forEach(t=>{
+      const mr=gMainRect(g);if(!mr)return;
+      const w=+mr.getAttribute('width');
+      t.setAttribute('transform',cur?'':`translate(${w},0) scale(-1,1)`);
+    });
+  });
+  drawSelHandles();pushH();ctx.classList.remove('vis');
+  toast('Volteado H','ok');
+}
+function flipV(){
+  if(S.sels.length===0)return;
+  S.sels.forEach(g=>{
+    const cur=+g.getAttribute('data-flipv')||0;
+    g.setAttribute('data-flipv',cur?0:1);
+    const pos=gPos(g);sPos(g,pos.x,pos.y);
+    // Flip label text back so it stays readable
+    g.querySelectorAll('.room-label').forEach(t=>{
+      const mr=gMainRect(g);if(!mr)return;
+      const h=+mr.getAttribute('height');
+      t.setAttribute('transform',cur?'':`translate(0,${h}) scale(1,-1)`);
+    });
+  });
+  drawSelHandles();pushH();ctx.classList.remove('vis');
+  toast('Volteado V','ok');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -991,8 +1455,9 @@ function wallSnap(g,nx,ny,w,h){
 // ═══════════════════════════════════════════════════════════════
 // DRAG (Multi-selection aware)
 // ═══════════════════════════════════════════════════════════════
-function dragMv(p){
-  const dx=p.x-S.ds.x,dy=p.y-S.ds.y;
+function dragMv(p,shift){
+  let dx=p.x-S.ds.x,dy=p.y-S.ds.y;
+  if(shift){if(Math.abs(dx)>Math.abs(dy))dy=0;else dx=0;}
   if(S.sels.length===1){
     const orig=S.dragOs[0];
     let nx=sn(orig.x+dx),ny=sn(orig.y+dy);
@@ -1091,9 +1556,26 @@ function centerLabels(g){
     const rects=g.querySelectorAll('rect');
     if(rects[1]){rects[1].setAttribute('width',w);rects[1].setAttribute('height',h)}
   }
+  // Update floor tile overlay for rooms
+  const tile=g.querySelector('.room-tile');
+  if(tile){tile.setAttribute('width',w);tile.setAttribute('height',h)}
   // Rebuild furniture shapes on resize
   const fn=g.getAttribute('data-furn');
   if(fn){g.querySelectorAll('.furn-detail').forEach(e=>e.remove());addFurnShape(g,fn,w,h);const txt=g.querySelector('.room-label');if(txt)g.appendChild(txt)}
+  // Rebuild door parts on resize
+  if(g.getAttribute('data-type')==='door'){
+    g.querySelectorAll('.door-part').forEach(e=>e.remove());
+    const aw=+mr.getAttribute('width'),ah=+mr.getAttribute('height');
+    const horiz=aw>ah;const dw=horiz?aw:ah;const thick=horiz?ah:aw;
+    buildDoorParts(g,dw,thick,horiz);
+  }
+  // Rebuild window parts on resize
+  if(g.getAttribute('data-type')==='window'){
+    g.querySelectorAll('.win-part').forEach(e=>e.remove());
+    const aw=+mr.getAttribute('width'),ah=+mr.getAttribute('height');
+    const horiz=aw>ah;const sw=horiz?aw:ah;const thick=horiz?ah:aw;
+    buildWinParts(g,sw,thick,horiz);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1109,7 +1591,7 @@ function drawDn(p){
     });return;
   }
   S.draw=true;S.drawS={x:sx,y:sy};
-  if(S.tool==='room'){S.drawEl=mkRoom(sx,sy,0,0,'#f0f3f5','',null,'#555');blocksG.appendChild(S.drawEl)}
+  if(S.tool==='room'){S.drawEl=mkRoom(sx,sy,0,0,'#f5f2ed','',null,'#4a4a4a');blocksG.appendChild(S.drawEl)}
   else if(S.tool==='wall'){S.drawEl=mkWall(sx,sy,0,0,'');blocksG.appendChild(S.drawEl)}
   else if(S.tool==='door'){S.drawEl=mkDoor(sx,sy,0,true);blocksG.appendChild(S.drawEl)}
   else if(S.tool==='window'){S.drawEl=mkWindow(sx,sy,0,true);blocksG.appendChild(S.drawEl)}
@@ -1143,7 +1625,7 @@ function drawUp(){
       name=name||'Habitacion';
       g.setAttribute('data-name',name);
       const t=ce('text');t.setAttribute('x',w/2);t.setAttribute('y',h/2+4);t.setAttribute('text-anchor','middle');
-      t.setAttribute('font-size',Math.min(17,w/8));t.setAttribute('fill','#555');t.setAttribute('font-weight','600');
+      t.setAttribute('font-size',Math.min(18,w/7));t.setAttribute('fill','#4a4a4a');t.setAttribute('font-weight','700');
       t.setAttribute('font-family','Inter,Arial,sans-serif');t.setAttribute('class','room-label');t.textContent=name;
       g.appendChild(t);
       pushH();updAutoDims();sel(g);setT('select');
@@ -1277,7 +1759,9 @@ function showProps(g){
     if(mw>.1&&mh>.1)h+=pv('Area',(mw*mh).toFixed(2)+' m2');
     h+=pv('Pos',px2mx(rc.x-S.OX).toFixed(1)+', '+px2my(rc.y-S.OY).toFixed(1)+' m');
     const rot=+g.getAttribute('data-rot')||0;
-    if(rot)h+=pv('Rot',rot+'°');
+    const fh=+g.getAttribute('data-fliph')||0;
+    const fv=+g.getAttribute('data-flipv')||0;
+    if(rot||fh||fv){let tf=[];if(rot)tf.push(rot+'°');if(fh)tf.push('↔');if(fv)tf.push('↕');h+=pv('Transform',tf.join(' '))}
     h+='</div><div style="height:8px"></div>';
     const mr=gMainRect(g),pos=gPos(g);
     if(mr){
@@ -1301,6 +1785,7 @@ function showMultiProps(){
   let totalArea=0;
   S.sels.forEach(g=>{const rc=gRect(g);if(rc)totalArea+=px2mx(rc.w)*px2my(rc.h)});
   $('pcontent').innerHTML=`<div class="pg">${pv('Elementos',S.sels.length)}${pv('Area total',totalArea.toFixed(2)+' m2')}</div>`;
+  $('alignsec').style.display='block';
 }
 
 function pv(l,v){return`<div class="pi"><div class="pl">${l}</div><div class="pv">${v}</div></div>`}
@@ -1332,29 +1817,41 @@ function back(){S.sels.forEach(g=>blocksG.insertBefore(g,blocksG.firstChild));ct
 // ═══════════════════════════════════════════════════════════════
 const FURN_ITEMS=[
   // Sala
-  {n:'Sofa',w:120,h:40,f:'#8d6e63',cat:'Sala',icon:'<rect x="2" y="8" width="36" height="18" rx="3"/><rect x="5" y="12" width="30" height="10" rx="2" fill="currentColor" opacity=".15"/><rect x="2" y="4" width="8" height="8" rx="2"/><rect x="30" y="4" width="8" height="8" rx="2"/>'},
-  {n:'Mesa',w:80,h:60,f:'#a1887f',cat:'Sala',icon:'<ellipse cx="20" cy="15" rx="14" ry="10"/>'},
-  {n:'Silla',w:35,h:35,f:'#bcaaa4',cat:'Sala',icon:'<circle cx="20" cy="17" r="9"/><rect x="10" y="3" width="20" height="6" rx="2"/>'},
-  {n:'TV',w:80,h:8,f:'#37474f',cat:'Sala',icon:'<rect x="3" y="10" width="34" height="6" rx="1"/><rect x="16" y="16" width="8" height="6" rx="1"/>'},
+  {n:'Sofa',w:120,h:40,f:'#f0ece8',cat:'Sala',icon:'<rect x="2" y="2" width="36" height="6" rx="1" fill="none"/><rect x="2" y="2" width="3" height="24" rx="1" fill="none"/><rect x="35" y="2" width="3" height="24" rx="1" fill="none"/>'},
+  {n:'Mesa',w:80,h:60,f:'#f0ece8',cat:'Sala',icon:'<ellipse cx="20" cy="15" rx="14" ry="10" fill="none"/>'},
+  {n:'Silla',w:35,h:35,f:'#f0ece8',cat:'Sala',icon:'<rect x="10" y="8" width="20" height="18" rx="1" fill="none"/><rect x="8" y="2" width="24" height="5" rx="1" fill="none"/>'},
+  {n:'TV',w:80,h:8,f:'#e8e8e8',cat:'Sala',icon:'<rect x="3" y="8" width="34" height="10" rx="1" fill="none"/><rect x="16" y="18" width="8" height="6" rx="1" fill="none"/>'},
+  {n:'Chimenea',w:80,h:30,f:'#f0ece8',cat:'Sala',icon:'<rect x="4" y="4" width="32" height="22" rx="1" fill="none"/><path d="M10,26 L10,12 Q10,8 20,8 Q30,8 30,12 L30,26" fill="none"/>'},
   // Dormitorio
-  {n:'Cama',w:100,h:130,f:'#90caf9',cat:'Dormitorio',icon:'<rect x="2" y="2" width="36" height="26" rx="2"/><rect x="5" y="4" width="13" height="8" rx="4" fill="currentColor" opacity=".15"/><rect x="22" y="4" width="13" height="8" rx="4" fill="currentColor" opacity=".15"/><line x1="2" y1="16" x2="38" y2="16"/>'},
-  {n:'Armario',w:100,h:45,f:'#8d6e63',cat:'Dormitorio',icon:'<rect x="2" y="5" width="36" height="20" rx="2"/><line x1="20" y1="5" x2="20" y2="25"/><circle cx="17" cy="15" r="1.5"/><circle cx="23" cy="15" r="1.5"/>'},
-  {n:'Mesa de noche',w:35,h:35,f:'#a1887f',cat:'Dormitorio',icon:'<rect x="8" y="5" width="24" height="20" rx="2"/><line x1="8" y1="15" x2="32" y2="15"/><circle cx="20" cy="10" r="1.5"/>'},
-  {n:'Escritorio',w:100,h:55,f:'#78909c',cat:'Dormitorio',icon:'<rect x="2" y="4" width="36" height="22" rx="2"/><rect x="4" y="4" width="32" height="5" rx="1" fill="currentColor" opacity=".15"/><rect x="5" y="16" width="15" height="8" rx="1" fill="currentColor" opacity=".1"/>'},
+  {n:'Cama',w:100,h:130,f:'#f0ece8',cat:'Dormitorio',icon:'<rect x="2" y="2" width="36" height="26" rx="1" fill="none"/><rect x="4" y="3" width="14" height="6" rx="2" fill="none"/><rect x="22" y="3" width="14" height="6" rx="2" fill="none"/><line x1="2" y1="12" x2="38" y2="12"/>'},
+  {n:'Armario',w:100,h:45,f:'#ede9e5',cat:'Dormitorio',icon:'<rect x="2" y="5" width="36" height="20" rx="1" fill="none"/><line x1="20" y1="5" x2="20" y2="25"/><circle cx="17" cy="15" r="1.5" fill="currentColor"/><circle cx="23" cy="15" r="1.5" fill="currentColor"/>'},
+  {n:'Mesa de noche',w:35,h:35,f:'#f0ece8',cat:'Dormitorio',icon:'<rect x="8" y="5" width="24" height="20" rx="1" fill="none"/><line x1="8" y1="15" x2="32" y2="15"/><circle cx="20" cy="10" r="1" fill="currentColor"/>'},
+  {n:'Escritorio',w:100,h:55,f:'#f0ece8',cat:'Dormitorio',icon:'<rect x="2" y="4" width="36" height="22" rx="1" fill="none"/><rect x="4" y="14" width="16" height="10" rx="1" fill="none"/>'},
   // Baño
-  {n:'Inodoro',w:35,h:45,f:'#e0e0e0',cat:'Baño',icon:'<ellipse cx="20" cy="18" rx="10" ry="8"/><rect x="12" y="2" width="16" height="12" rx="2"/>'},
-  {n:'Ducha',w:60,h:60,f:'#b3e5fc',cat:'Baño',icon:'<rect x="4" y="4" width="22" height="22" rx="2"/><line x1="4" y1="4" x2="26" y2="26" stroke-dasharray="3,2"/>'},
-  {n:'Lavabo',w:40,h:30,f:'#e0e0e0',cat:'Baño',icon:'<ellipse cx="20" cy="16" rx="12" ry="8"/><circle cx="20" cy="16" r="2"/>'},
-  {n:'Bañera',w:60,h:130,f:'#b3e5fc',cat:'Baño',icon:'<rect x="4" y="2" width="32" height="26" rx="10"/><ellipse cx="20" cy="15" rx="12" ry="9" fill="currentColor" opacity=".1"/><circle cx="20" cy="6" r="1.5"/>'},
+  {n:'Inodoro',w:35,h:45,f:'#fff',cat:'Baño',icon:'<rect x="10" y="2" width="20" height="10" rx="1" fill="none"/><path d="M10,26 L10,13 Q10,10 20,10 Q30,10 30,13 L30,26" fill="none"/>'},
+  {n:'Ducha',w:60,h:60,f:'#fff',cat:'Baño',icon:'<rect x="4" y="4" width="22" height="22" rx="1" fill="none"/><line x1="4" y1="4" x2="26" y2="26"/><line x1="26" y1="4" x2="4" y2="26"/>'},
+  {n:'Lavabo',w:40,h:30,f:'#fff',cat:'Baño',icon:'<path d="M8,5 L32,5 L32,12 Q32,24 20,24 Q8,24 8,12 Z" fill="none"/><circle cx="20" cy="14" r="2" fill="none"/>'},
+  {n:'Bañera',w:60,h:130,f:'#fff',cat:'Baño',icon:'<rect x="4" y="2" width="32" height="26" rx="8" fill="none"/><ellipse cx="20" cy="15" rx="12" ry="9" fill="none"/>'},
   // Cocina
-  {n:'Estufa',w:50,h:50,f:'#ef9a9a',cat:'Cocina',icon:'<rect x="4" y="4" width="32" height="22" rx="2"/><circle cx="14" cy="12" r="4"/><circle cx="26" cy="12" r="4"/>'},
-  {n:'Nevera',w:45,h:55,f:'#e0e0e0',cat:'Cocina',icon:'<rect x="8" y="2" width="24" height="26" rx="2"/><line x1="8" y1="12" x2="32" y2="12"/>'},
-  {n:'Lavadora',w:45,h:45,f:'#cfd8dc',cat:'Cocina',icon:'<rect x="4" y="4" width="32" height="22" rx="2"/><circle cx="20" cy="15" r="7"/><circle cx="20" cy="15" r="4" fill="currentColor" opacity=".1"/>'},
+  {n:'Estufa',w:50,h:50,f:'#fff',cat:'Cocina',icon:'<rect x="4" y="4" width="32" height="22" rx="1" fill="none"/><circle cx="14" cy="10" r="4" fill="none"/><circle cx="26" cy="10" r="4" fill="none"/><circle cx="14" cy="20" r="4" fill="none"/><circle cx="26" cy="20" r="4" fill="none"/>'},
+  {n:'Nevera',w:45,h:55,f:'#fff',cat:'Cocina',icon:'<rect x="8" y="2" width="24" height="26" rx="1" fill="none"/><line x1="8" y1="10" x2="32" y2="10"/><line x1="28" y1="4" x2="28" y2="8"/><line x1="28" y1="13" x2="28" y2="25"/>'},
+  {n:'Lavadora',w:45,h:45,f:'#f5f5f5',cat:'Cocina',icon:'<rect x="4" y="4" width="32" height="22" rx="1" fill="none"/><circle cx="20" cy="16" r="7" fill="none"/><circle cx="20" cy="16" r="4" fill="none"/>'},
   // Simbolos
-  {n:'Escalera',w:80,h:120,f:'#f5f5f5',cat:'Simbolos',icon:'<rect x="4" y="2" width="32" height="26" rx="1"/><line x1="4" y1="6" x2="36" y2="6"/><line x1="4" y1="10" x2="36" y2="10"/><line x1="4" y1="14" x2="36" y2="14"/><line x1="4" y1="18" x2="36" y2="18"/><line x1="4" y1="22" x2="36" y2="22"/><path d="M16,14 L20,8 L24,14" fill="none"/>'},
-  {n:'Columna',w:20,h:20,f:'#9e9e9e',cat:'Simbolos',icon:'<circle cx="20" cy="15" r="10" fill="currentColor" opacity=".3"/><line x1="10" y1="15" x2="30" y2="15"/><line x1="20" y1="5" x2="20" y2="25"/>'},
-  {n:'Flecha Norte',w:30,h:40,f:'#fff',cat:'Simbolos',icon:'<path d="M20,3 L30,22 L20,17 L10,22 Z" fill="currentColor" opacity=".3"/><text x="20" y="28" text-anchor="middle" font-size="8" fill="currentColor" font-weight="bold">N</text>'},
+  {n:'Escalera',w:80,h:120,f:'#fff',cat:'Simbolos',icon:'<rect x="4" y="2" width="32" height="26" rx="1" fill="none"/><line x1="4" y1="6" x2="36" y2="6"/><line x1="4" y1="10" x2="36" y2="10"/><line x1="4" y1="14" x2="36" y2="14"/><line x1="4" y1="18" x2="36" y2="18"/><line x1="4" y1="22" x2="36" y2="22"/><path d="M20,22 L20,6 M16,10 L20,6 L24,10" fill="none"/>'},
+  {n:'Columna',w:20,h:20,f:'#333',cat:'Simbolos',icon:'<rect x="10" y="5" width="20" height="20" fill="currentColor" opacity=".4"/>'},
+  {n:'Flecha Norte',w:30,h:40,f:'none',cat:'Simbolos',icon:'<path d="M20,3 L28,18 L20,14 L12,18 Z" fill="currentColor" opacity=".3"/><text x="20" y="27" text-anchor="middle" font-size="8" fill="currentColor" font-weight="bold">N</text>'},
+  // Personalizado
+  {n:'Otro...',w:60,h:40,f:'#f0ece8',cat:'Otro',custom:true,icon:'<rect x="6" y="4" width="28" height="22" rx="2" fill="none" stroke-dasharray="3,2"/><text x="20" y="18" text-anchor="middle" font-size="7" fill="currentColor">+</text>'},
 ];
+
+function addCustomFurn(dropX,dropY){
+  const name=prompt('Nombre del mueble:');
+  if(!name||!name.trim())return;
+  const nm=name.trim();
+  const x=dropX!=null?dropX:350,y=dropY!=null?dropY:450;
+  const g=mkFurn(x,y,60,40,'#f0ece8',nm);
+  blocksG.appendChild(g);sel(g);setT('select');pushH();updAutoDims();toast(nm+' agregado','ok');
+}
 
 function buildLib(){
   const box=$('furnlib');box.innerHTML='';
@@ -1370,14 +1867,22 @@ function buildLib(){
       const d=document.createElement('div');d.className='li';
       d.setAttribute('draggable','true');
       d.innerHTML=`<svg viewBox="0 0 40 30" fill="none" stroke="currentColor" stroke-width="1.5">${it.icon}</svg><span>${it.n}</span>`;
-      d.addEventListener('dragstart',e=>{
-        e.dataTransfer.setData('text/plain',JSON.stringify({n:it.n,w:it.w,h:it.h,f:it.f}));
-        e.dataTransfer.effectAllowed='copy';
-      });
-      d.addEventListener('click',()=>{
-        const g=mkFurn(350,450,it.w,it.h,it.f,it.n);
-        blocksG.appendChild(g);sel(g);setT('select');pushH();updAutoDims();toast(it.n+' agregado','ok');
-      });
+      if(it.custom){
+        d.addEventListener('click',()=>{addCustomFurn()});
+        d.addEventListener('dragstart',e=>{
+          e.dataTransfer.setData('text/plain',JSON.stringify({n:'_custom_',w:it.w,h:it.h,f:it.f}));
+          e.dataTransfer.effectAllowed='copy';
+        });
+      }else{
+        d.addEventListener('dragstart',e=>{
+          e.dataTransfer.setData('text/plain',JSON.stringify({n:it.n,w:it.w,h:it.h,f:it.f}));
+          e.dataTransfer.effectAllowed='copy';
+        });
+        d.addEventListener('click',()=>{
+          const g=mkFurn(350,450,it.w,it.h,it.f,it.n);
+          blocksG.appendChild(g);sel(g);setT('select');pushH();updAutoDims();toast(it.n+' agregado','ok');
+        });
+      }
       grid.appendChild(d);
     });
     box.appendChild(grid);
@@ -1390,6 +1895,10 @@ function onDrop(e){
     const data=JSON.parse(e.dataTransfer.getData('text/plain'));
     if(!data.n||!data.w)return;
     const p=c2s(e.clientX,e.clientY);
+    if(data.n==='_custom_'){
+      addCustomFurn(sn(p.x-data.w/2),sn(p.y-data.h/2));
+      return;
+    }
     const g=mkFurn(sn(p.x-data.w/2),sn(p.y-data.h/2),data.w,data.h,data.f,data.n);
     blocksG.appendChild(g);sel(g);setT('select');pushH();updAutoDims();
     toast(data.n+' agregado','ok');
@@ -1502,7 +2011,7 @@ function applyLayers(){
 // ═══════════════════════════════════════════════════════════════
 // UNDO/REDO
 // ═══════════════════════════════════════════════════════════════
-function pushH(){const c=blocksG.innerHTML;S.hist=S.hist.slice(0,S.hi+1);S.hist.push(c);S.hi=S.hist.length-1;if(S.hist.length>60){S.hist.shift();S.hi--}}
+function pushH(){const c=blocksG.innerHTML;S.hist=S.hist.slice(0,S.hi+1);S.hist.push(c);S.hi=S.hist.length-1;if(S.hist.length>60){S.hist.shift();S.hi--}S.dirty=true;updProjIndicator()}
 function undo(){if(S.hi<=0)return;S.hi--;restoreH();toast('Deshacer')}
 function redo(){if(S.hi>=S.hist.length-1)return;S.hi++;restoreH();toast('Rehacer')}
 function restoreH(){desel();blocksG.innerHTML=S.hist[S.hi];updAutoDims();applyLayers()}
@@ -1513,10 +2022,54 @@ function restoreH(){desel();blocksG.innerHTML=S.hist[S.hi];updAutoDims();applyLa
 function loadFile(){$('finput').click()}
 function onFile(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const d=new DOMParser().parseFromString(ev.target.result,'image/svg+xml');const s=d.querySelector('svg');if(!s){toast('SVG invalido','w');return}wrap.innerHTML='';wrap.appendChild(document.importNode(s,true));svg=wrap.querySelector('svg');const vb=svg.getAttribute('viewBox');if(vb){const p=vb.split(/[\s,]+/);svg.style.width=p[2]+'px';svg.style.height=p[3]+'px'}fit();toast('Cargado: '+f.name,'ok')};r.readAsText(f);e.target.value=''}
 function expSVG(){const c=svg.cloneNode(true);['#selG','#liveG','#snapG','#gridG'].forEach(s=>{const e=c.querySelector(s);if(e)e.remove()});const d=new XMLSerializer().serializeToString(c);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([d],{type:'image/svg+xml'}));a.download='plano.svg';a.click();toast('SVG exportado','ok')}
-function expPNG(){const c=svg.cloneNode(true);['#selG','#liveG','#snapG','#gridG'].forEach(s=>{const e=c.querySelector(s);if(e)e.remove()});const d=new XMLSerializer().serializeToString(c);const cv=document.createElement('canvas');cv.width=1600;cv.height=2000;const cx=cv.getContext('2d');const img=new Image();img.onload=()=>{cx.fillStyle='#fafbfc';cx.fillRect(0,0,1600,2000);cx.drawImage(img,0,0,1600,2000);const a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='plano.png';a.click();toast('PNG exportado','ok')};img.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(d)))}
-function save(){localStorage.setItem('plano-v4',JSON.stringify({blocks:blocksG.innerHTML,wm:S.WM,hm:S.HM}));toast('Guardado','ok')}
-function loadSaved(){const d=localStorage.getItem('plano-v4');if(!d)return false;try{const p=JSON.parse(d);buildPlan();blocksG.innerHTML=p.blocks;S.WM=p.wm||8.5;S.HM=p.hm||10.1;$('sw').value=S.WM;$('sh').value=S.HM;return true}catch{return false}}
-function resetPlan(){localStorage.removeItem('plano-v4');buildPlan();fit();pushH();updAutoDims();updScaleDisp();toast('Plan reseteado','ok')}
+function expPNG(){const c=svg.cloneNode(true);['#selG','#liveG','#snapG','#gridG'].forEach(s=>{const e=c.querySelector(s);if(e)e.remove()});const d=new XMLSerializer().serializeToString(c);const cv=document.createElement('canvas');cv.width=1600;cv.height=2000;const cx=cv.getContext('2d');const img=new Image();img.onload=()=>{cx.fillStyle='#f0ede6';cx.fillRect(0,0,1600,2000);cx.drawImage(img,0,0,1600,2000);const a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='plano.png';a.click();toast('PNG exportado','ok')};img.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(d)))}
+function expPDF(){
+  const s=+prompt('Escala de impresion:\n\n  50 = escala 1:50 (detalles, grande)\n  100 = escala 1:100 (vista general)\n\nIngrese el denominador:','100');
+  if(!s||s<=0)return;
+  const c=svg.cloneNode(true);
+  ['#selG','#liveG','#snapG','#gridG'].forEach(sel=>{const e=c.querySelector(sel);if(e)e.remove()});
+  const svgStr=new XMLSerializer().serializeToString(c);
+  // Calculate print dimensions in mm (real meters * 1000 / scale)
+  const svgWMM=((800/S.WPx)*S.WM*1000/s).toFixed(1);
+  const svgHMM=((1000/S.HPx)*S.HM*1000/s).toFixed(1);
+  // Build area table rows
+  let rows='',total=0;
+  blocksG.querySelectorAll('[data-type="room"]').forEach(g=>{
+    const rc=gRect(g);if(!rc)return;
+    const mw=px2mx(rc.w),mh=px2my(rc.h),area=mw*mh;total+=area;
+    rows+=`<tr><td>${g.getAttribute('data-name')||'?'}</td><td style="text-align:right">${mw.toFixed(2)} x ${mh.toFixed(2)}</td><td style="text-align:right;font-weight:600">${area.toFixed(2)} m\u00b2</td></tr>`;
+  });
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Plano - Escala 1:${s}</title>
+<style>
+@page{size:auto;margin:10mm}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Arial,sans-serif;color:#333;padding:6mm}
+.hdr{text-align:center;margin-bottom:5mm;border-bottom:2px solid #333;padding-bottom:4mm}
+.hdr h1{font-size:15pt;font-weight:700;margin-bottom:1mm;letter-spacing:-.3px}
+.hdr p{font-size:10pt;color:#666}
+.meta{display:flex;justify-content:space-between;font-size:8pt;color:#888;margin-bottom:3mm;padding:0 2mm}
+.plan{width:${svgWMM}mm;margin:3mm auto;overflow:visible}
+.plan svg{width:100%;height:auto;display:block}
+table.tbl{margin:5mm auto;border-collapse:collapse;font-size:9pt;min-width:50%}
+.tbl th,.tbl td{border:1px solid #ccc;padding:1.5mm 4mm}
+.tbl th{background:#f0f0f0;font-weight:700;text-align:left;font-size:8pt;text-transform:uppercase;letter-spacing:.5px}
+.tbl tfoot td{font-weight:700;border-top:2px solid #333;background:#fafafa}
+.ft{text-align:center;margin-top:5mm;font-size:7pt;color:#bbb;border-top:1px solid #eee;padding-top:2mm}
+@media screen{body{max-width:850px;margin:0 auto;padding:20px}.plan{border:1px solid #ddd;padding:5mm;background:#fff}}
+</style></head><body>
+<div class="hdr"><h1>Plano Arquitectonico</h1><p>Area total: ${total.toFixed(2)} m\u00b2 &mdash; Escala 1:${s}</p></div>
+<div class="meta"><span>Fecha: ${new Date().toLocaleDateString()}</span><span>Medidas: ${S.WM}m x ${S.HM}m</span><span>1 cm en papel = ${(s/100).toFixed(2)} m reales</span></div>
+<div class="plan">${svgStr}</div>
+<table class="tbl"><thead><tr><th>Ambiente</th><th>Dimensiones</th><th>Area</th></tr></thead><tbody>${rows}</tbody>
+<tfoot><tr><td colspan="2">Total</td><td style="text-align:right">${total.toFixed(2)} m\u00b2</td></tr></tfoot></table>
+<div class="ft">Generado por ArquiPlan &bull; ${new Date().toLocaleDateString()}</div>
+<script>setTimeout(function(){window.print()},600)<\/script>
+</body></html>`);
+  win.document.close();
+  toast('PDF listo para imprimir','ok');
+}
+// save/loadSaved/resetPlan removed — replaced by project system
 
 // ═══════════════════════════════════════════════════════════════
 // MODAL / TOAST / STATUS
@@ -1528,11 +2081,429 @@ function toast(m,t=''){const d=document.createElement('div');d.className='toast 
 function updPos(p){$('spos').textContent=`X: ${px2mx(p.x-S.OX).toFixed(2)}m   Y: ${px2my(p.y-S.OY).toFixed(2)}m`}
 
 // ═══════════════════════════════════════════════════════════════
+// LIGHT/DARK MODE
+// ═══════════════════════════════════════════════════════════════
+function toggleTheme(){
+  document.body.classList.toggle('light');
+  S.lightMode=document.body.classList.contains('light');
+  localStorage.setItem('ap-theme',S.lightMode?'light':'dark');
+  const btn=$('themeBtn');
+  if(btn)btn.innerHTML=S.lightMode?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>';
+  drawRulers();
+  toast(S.lightMode?'Modo claro':'Modo oscuro','ok');
+}
+function loadTheme(){
+  const t=localStorage.getItem('ap-theme');
+  if(t==='light'){document.body.classList.add('light');S.lightMode=true;
+    const btn=$('themeBtn');
+    if(btn)btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RULERS
+// ═══════════════════════════════════════════════════════════════
+function togRulers(){S.rulersOn=$('rulerck').checked;$('rulerH').style.display=S.rulersOn?'':'none';$('rulerV').style.display=S.rulersOn?'':'none';$('rulerC').style.display=S.rulersOn?'':'none';if(S.rulersOn)drawRulers()}
+function drawRulers(){if(!S.rulersOn)return;drawRulerH();drawRulerV()}
+function drawRulerH(){
+  const el=$('rulerH'),cv=$('rHc');if(!el||!cv)return;
+  const w=el.clientWidth,h=22,dpr=window.devicePixelRatio||1;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';
+  const c=cv.getContext('2d');c.scale(dpr,dpr);
+  const light=S.lightMode;
+  c.fillStyle=light?'#fff':'#1a1a2e';c.fillRect(0,0,w,h);
+  c.strokeStyle=light?'#ccc':'#2d2d50';c.fillStyle=light?'#888':'#667';
+  c.font='8px Inter,sans-serif';c.textBaseline='top';
+  for(let m=-2;m<S.WM+5;m+=0.25){
+    const svgX=S.OX+m2px(m),sx=svgX*S.zoom+S.px;
+    if(sx<-20||sx>w+20)continue;
+    const major=Math.abs(m%1)<.01,mid=Math.abs(m%0.5)<.01&&!major;
+    c.beginPath();c.moveTo(sx,major?4:mid?12:16);c.lineTo(sx,h);c.lineWidth=major?1:0.5;c.stroke();
+    if(major)c.fillText(m.toFixed(0)+'m',sx+2,2);
+  }
+}
+function drawRulerV(){
+  const el=$('rulerV'),cv=$('rVc');if(!el||!cv)return;
+  const w=22,h=el.clientHeight,dpr=window.devicePixelRatio||1;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';
+  const c=cv.getContext('2d');c.scale(dpr,dpr);
+  const light=S.lightMode;
+  c.fillStyle=light?'#fff':'#1a1a2e';c.fillRect(0,0,w,h);
+  c.strokeStyle=light?'#ccc':'#2d2d50';c.fillStyle=light?'#888':'#667';
+  c.font='8px Inter,sans-serif';c.textBaseline='middle';
+  for(let m=-2;m<S.HM+5;m+=0.25){
+    const svgY=S.OY+m2py(m),sy=svgY*S.zoom+S.py-22;
+    if(sy<-20||sy>h+20)continue;
+    const major=Math.abs(m%1)<.01,mid=Math.abs(m%0.5)<.01&&!major;
+    c.beginPath();c.moveTo(major?4:mid?12:16,sy);c.lineTo(w,sy);c.lineWidth=major?1:0.5;c.stroke();
+    if(major){c.save();c.translate(9,sy+2);c.rotate(-Math.PI/2);c.fillText(m.toFixed(0)+'m',0,0);c.restore()}
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BACKGROUND IMAGE
+// ═══════════════════════════════════════════════════════════════
+function importBgImage(){$('bginput').click()}
+function onBgFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const dataUrl=ev.target.result;
+    bgImgG.innerHTML='';
+    const img=ce('image');
+    img.setAttributeNS('http://www.w3.org/1999/xlink','href',dataUrl);
+    sa(img,{x:S.OX,y:S.OY,width:S.WPx,height:S.HPx,opacity:S.bgOpacity,preserveAspectRatio:'xMidYMid meet'});
+    bgImgG.appendChild(img);
+    S.bgImgData=dataUrl;
+    updBgControls();
+    toast('Imagen de fondo cargada','ok');
+  };
+  reader.readAsDataURL(f);e.target.value='';
+}
+function setBgOpacity(v){
+  S.bgOpacity=v;
+  const img=bgImgG?bgImgG.querySelector('image'):null;
+  if(img)img.setAttribute('opacity',v);
+  const lbl=$('bgoplbl');if(lbl)lbl.textContent=Math.round(v*100)+'%';
+}
+function removeBgImage(){bgImgG.innerHTML='';S.bgImgData=null;updBgControls();toast('Imagen eliminada','w')}
+function updBgControls(){
+  const box=$('bgcontent');if(!box)return;
+  if(S.bgImgData){
+    box.innerHTML=`<div class="bg-ctrl"><span style="font-size:10px;color:var(--txt2)">Opacidad</span><input type="range" min="0.05" max="1" step="0.05" value="${S.bgOpacity}" oninput="setBgOpacity(+this.value)"><span id="bgoplbl">${Math.round(S.bgOpacity*100)}%</span></div><button class="tb" onclick="removeBgImage()" style="width:100%;justify-content:center;margin-top:4px;color:var(--red)">Eliminar fondo</button>`;
+  }else{
+    box.innerHTML='<div style="font-size:11px;color:var(--txt3);padding:4px 0">Sin imagen. Usa el boton "Fondo" para importar.</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROJECTS
+// ═══════════════════════════════════════════════════════════════
+const PROJ_KEY='ap-projects';
+function getProjects(){try{return JSON.parse(localStorage.getItem(PROJ_KEY))||[]}catch{return[]}}
+function updProjIndicator(){
+  const el=$('projind');if(!el)return;
+  if(S.currentProject){
+    el.innerHTML=`<span class="pi-dot ${S.dirty?'dirty':'saved'}"></span><span class="pi-name">${S.currentProject}</span>`;
+    el.style.display='flex';
+  }else{
+    el.innerHTML='<span class="pi-name" style="color:var(--txt3)">Sin proyecto</span>';
+    el.style.display='flex';
+  }
+}
+function getProjectData(){
+  return {blocks:blocksG.innerHTML,wm:S.WM,hm:S.HM,bgImg:S.bgImgData||null,bgOp:S.bgOpacity};
+}
+function saveProjectByName(name){
+  const projects=getProjects();
+  const entry={name,data:getProjectData(),date:new Date().toISOString()};
+  const idx=projects.findIndex(p=>p.name===name);
+  if(idx>=0)projects[idx]=entry;else projects.push(entry);
+  localStorage.setItem(PROJ_KEY,JSON.stringify(projects));
+  S.currentProject=name;S.dirty=false;updProjIndicator();
+}
+function saveProject(){
+  if(S.currentProject){
+    saveProjectByName(S.currentProject);
+    toast('Guardado','ok');
+  }else{
+    showSaveAsModal();
+  }
+}
+function showSaveAsModal(){
+  $('savename').value=S.currentProject||'Mi plano';
+  $('savemodal').classList.add('vis');
+  setTimeout(()=>{$('savename').focus();$('savename').select()},50);
+}
+function doSaveAs(){
+  const name=$('savename').value.trim();
+  if(!name){toast('Ingresa un nombre','w');return}
+  saveProjectByName(name);
+  $('savemodal').classList.remove('vis');
+  toast('Proyecto "'+name+'" guardado','ok');
+}
+function toggleSaveDD(){$('savedd').classList.toggle('vis')}
+function closeSaveDD(){$('savedd').classList.remove('vis')}
+function exportProjectFile(){
+  const name=S.currentProject||'plano';
+  const payload={version:'1.0',name,date:new Date().toISOString(),data:getProjectData()};
+  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=name.replace(/[^a-zA-Z0-9_\- ]/g,'')+'.arquiplan.json';a.click();
+  toast('Archivo exportado','ok');
+}
+function importProjectFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const payload=JSON.parse(ev.target.result);
+      if(!payload.data||!payload.data.blocks){toast('Archivo invalido','w');return}
+      let name=payload.name||f.name.replace(/\.json$/,'').replace(/\.arquiplan$/,'');
+      const existing=getProjects();
+      if(existing.find(p=>p.name===name))name+=' (2)';
+      const entry={name,data:payload.data,date:payload.date||new Date().toISOString()};
+      existing.push(entry);
+      localStorage.setItem(PROJ_KEY,JSON.stringify(existing));
+      loadProject(name);
+      toast('Proyecto "'+name+'" importado','ok');
+    }catch{toast('Error al leer archivo','w')}
+  };
+  reader.readAsText(f);e.target.value='';
+}
+function loadProject(name){
+  const proj=getProjects().find(p=>p.name===name);if(!proj)return;
+  buildPlan();blocksG.innerHTML=proj.data.blocks;
+  S.WM=proj.data.wm||8.5;S.HM=proj.data.hm||10.1;
+  $('sw').value=S.WM;$('sh').value=S.HM;
+  if(proj.data.bgImg&&bgImgG){
+    bgImgG.innerHTML='';
+    const img=ce('image');img.setAttributeNS('http://www.w3.org/1999/xlink','href',proj.data.bgImg);
+    sa(img,{x:S.OX,y:S.OY,width:S.WPx,height:S.HPx,opacity:proj.data.bgOp||0.3,preserveAspectRatio:'xMidYMid meet'});
+    bgImgG.appendChild(img);S.bgImgData=proj.data.bgImg;S.bgOpacity=proj.data.bgOp||0.3;
+  }else{S.bgImgData=null}
+  S.currentProject=name;
+  pushH();S.dirty=false;updProjIndicator();
+  updScaleDisp();updAutoDims();updBgControls();
+  toast('Proyecto "'+name+'" cargado','ok');
+}
+function deleteProject(name){
+  let p=getProjects().filter(x=>x.name!==name);
+  localStorage.setItem(PROJ_KEY,JSON.stringify(p));
+  if(S.currentProject===name)S.currentProject=null;
+}
+function showProjectsModal(){
+  const projects=getProjects(),box=$('projlist');box.innerHTML='';
+  if(projects.length===0){
+    box.innerHTML='<div style="text-align:center;color:var(--txt3);padding:20px;font-size:12px">No hay proyectos guardados.<br>Usa "Guardar" para crear uno.</div>';
+  }else{
+    projects.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    projects.forEach(p=>{
+      const d=document.createElement('div');d.className='proj-item'+(p.name===S.currentProject?' active':'');
+      const date=new Date(p.date).toLocaleDateString('es',{day:'numeric',month:'short',year:'numeric'});
+      const time=new Date(p.date).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+      const dims=p.data?(p.data.wm||0).toFixed(1)+'x'+(p.data.hm||0).toFixed(1)+'m':'';
+      d.innerHTML=`<div style="flex:1;min-width:0">
+        <div class="proj-name">${p.name}</div>
+        <div style="font-size:9px;color:var(--txt3);margin-top:1px">${date} ${time} &middot; ${dims}</div>
+      </div>
+      <button class="proj-dl" title="Descargar .json">&#8681;</button>
+      <button class="proj-del" title="Eliminar">&times;</button>`;
+      d.querySelector('.proj-name').addEventListener('click',()=>{loadProject(p.name);$('projmodal').classList.remove('vis')});
+      d.querySelector('.proj-dl').addEventListener('click',e=>{
+        e.stopPropagation();
+        const payload={version:'1.0',name:p.name,date:p.date,data:p.data};
+        const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+        a.download=p.name.replace(/[^a-zA-Z0-9_\- ]/g,'')+'.arquiplan.json';a.click();
+        toast('Descargado','ok');
+      });
+      d.querySelector('.proj-del').addEventListener('click',e=>{e.stopPropagation();if(confirm('Eliminar "'+p.name+'"?')){deleteProject(p.name);showProjectsModal()}});
+      box.appendChild(d);
+    });
+  }
+  $('projmodal').classList.add('vis');
+}
+function newProject(){
+  $('projmodal').classList.remove('vis');
+  showWizard();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ALIGNMENT
+// ═══════════════════════════════════════════════════════════════
+function alignSel(dir){
+  if(S.sels.length<2)return;
+  const rects=S.sels.map(g=>({g,pos:gPos(g),...gRect(g)})).filter(r=>r.w);
+  if(rects.length<2)return;
+  switch(dir){
+    case 'left':{const ref=Math.min(...rects.map(r=>r.x));rects.forEach(r=>{sPos(r.g,r.pos.x+(ref-r.x),r.pos.y)});break}
+    case 'centerH':{const ref=rects.reduce((s,r)=>s+r.x+r.w/2,0)/rects.length;rects.forEach(r=>{sPos(r.g,r.pos.x+(ref-r.x-r.w/2),r.pos.y)});break}
+    case 'right':{const ref=Math.max(...rects.map(r=>r.x+r.w));rects.forEach(r=>{sPos(r.g,r.pos.x+(ref-r.x-r.w),r.pos.y)});break}
+    case 'top':{const ref=Math.min(...rects.map(r=>r.y));rects.forEach(r=>{sPos(r.g,r.pos.x,r.pos.y+(ref-r.y))});break}
+    case 'centerV':{const ref=rects.reduce((s,r)=>s+r.y+r.h/2,0)/rects.length;rects.forEach(r=>{sPos(r.g,r.pos.x,r.pos.y+(ref-r.y-r.h/2))});break}
+    case 'bottom':{const ref=Math.max(...rects.map(r=>r.y+r.h));rects.forEach(r=>{sPos(r.g,r.pos.x,r.pos.y+(ref-r.y-r.h))});break}
+    case 'distH':{
+      rects.sort((a,b)=>a.x-b.x);const tw=rects.reduce((s,r)=>s+r.w,0);
+      const mn=rects[0].x,mx=rects[rects.length-1].x+rects[rects.length-1].w;
+      const gap=(mx-mn-tw)/(rects.length-1);let cx2=mn;
+      rects.forEach(r=>{sPos(r.g,r.pos.x+(cx2-r.x),r.pos.y);cx2+=r.w+gap});break}
+    case 'distV':{
+      rects.sort((a,b)=>a.y-b.y);const th=rects.reduce((s,r)=>s+r.h,0);
+      const mn=rects[0].y,mx=rects[rects.length-1].y+rects[rects.length-1].h;
+      const gap=(mx-mn-th)/(rects.length-1);let cy2=mn;
+      rects.forEach(r=>{sPos(r.g,r.pos.x,r.pos.y+(cy2-r.y));cy2+=r.h+gap});break}
+  }
+  drawSelHandles();pushH();updAutoDims();toast('Alineado','ok');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELP SYSTEM
+// ═══════════════════════════════════════════════════════════════
+function showHelp(){$('helpmodal').classList.add('vis');localStorage.setItem('ap-help-seen','1')}
+function togHelp(hdr){hdr.parentElement.classList.toggle('open')}
+function checkFirstVisit(){if(!localStorage.getItem('ap-help-seen'))setTimeout(showHelp,800)}
+
+// ═══════════════════════════════════════════════════════════════
+// WIZARD - NEW PROJECT TEMPLATES
+// ═══════════════════════════════════════════════════════════════
+function showWizard(){$('wizW').value=S.WM;$('wizH').value=S.HM;$('wizmodal').classList.add('vis')}
+
+function pickTemplate(id){
+  $('wizmodal').classList.remove('vis');
+  if(id==='3hab'){
+    S.WM=8.5;S.HM=10.1;buildPlan();
+    $('sw').value=S.WM;$('sh').value=S.HM;
+    fit();pushH();updScaleDisp();updAutoDims();S.currentProject=null;S.dirty=true;updProjIndicator();
+    toast('Plantilla "Mi Apartamento" creada','ok');return;
+  }
+  buildFromTemplate(id);
+}
+
+function buildCustom(){
+  const wm=+$('wizW').value,hm=+$('wizH').value;
+  const name=$('wizName').value.trim()||'Mi plano';
+  if(!wm||!hm||wm<2||wm>30||hm<2||hm>30){toast('Dimensiones: entre 2m y 30m','w');return}
+  $('wizmodal').classList.remove('vis');
+  buildFromTemplate('custom',wm,hm);
+  S.currentProject=name;S.dirty=true;updProjIndicator();
+}
+
+function buildFromTemplate(id,cwm,chm){
+  const TPLS={
+    estudio:{wm:5.8,hm:6.0,title:'Estudio - ~35 m\u00B2',
+      rooms:[
+        {x:0,y:0,w:3.8,h:6.0,f:'#f5f2ed',n:'Sala / Dormitorio'},
+        {x:3.8,y:0,w:2.0,h:3.0,f:'#f5edec',n:'Cocina',tc:'#8a3a3a'},
+        {x:3.8,y:3.0,w:2.0,h:2.0,f:'#eaf2f5',n:'Bano',tc:'#3a6b8a'},
+        {x:3.8,y:5.0,w:2.0,h:1.0,f:'#edf5ef',n:'Lavadero',tc:'#3a7a5a'}
+      ],
+      wins:[{x:0.5,y:0,w:1.2,hz:true},{x:2.3,y:0,w:0.8,hz:true}],
+      doors:[{x:3.75,y:3.5,w:0.7,hz:false}],
+      ent:{x:1.5,y:5.95,w:0.8,hz:true}
+    },
+    '1hab':{wm:7.0,hm:7.2,title:'1 Habitacion - ~50 m\u00B2',
+      rooms:[
+        {x:0,y:0,w:3.0,h:3.5,f:'#f2f0eb',n:'Dormitorio'},
+        {x:3.0,y:0,w:4.0,h:4.5,f:'#f5f3ec',n:'Sala - Comedor',tc:'#7a6830'},
+        {x:0,y:3.5,w:1.8,h:1.5,f:'#eaf2f5',n:'Bano',tc:'#3a6b8a'},
+        {x:1.8,y:3.5,w:1.2,h:3.7,f:'#f7f6f3',n:'Pasillo',tc:'#999'},
+        {x:3.0,y:4.5,w:4.0,h:2.7,f:'#f5edec',n:'Cocina',tc:'#8a3a3a'}
+      ],
+      wins:[{x:0.5,y:0,w:1.0,hz:true},{x:4.0,y:0,w:1.5,hz:true}],
+      doors:[{x:2.95,y:0.8,w:0.8,hz:false},{x:0.5,y:3.45,w:0.7,hz:true}],
+      ent:{x:3.5,y:7.15,w:0.9,hz:true}
+    },
+    '2hab':{wm:8.0,hm:8.8,title:'2 Habitaciones - ~70 m\u00B2',
+      rooms:[
+        {x:0,y:0,w:3.5,h:3.5,f:'#f2f0eb',n:'Habitacion Principal'},
+        {x:3.5,y:0,w:4.5,h:3.5,f:'#f5f2ed',n:'Habitacion 2'},
+        {x:0,y:3.5,w:4.5,h:5.3,f:'#f5f3ec',n:'Sala - Comedor',tc:'#7a6830'},
+        {x:4.5,y:3.5,w:3.5,h:2.0,f:'#eaf2f5',n:'Bano',tc:'#3a6b8a'},
+        {x:4.5,y:5.5,w:3.5,h:3.3,f:'#f5edec',n:'Cocina',tc:'#8a3a3a'}
+      ],
+      wins:[{x:0.5,y:0,w:1.2,hz:true},{x:5.0,y:0,w:1.2,hz:true},{x:0,y:5.0,w:1.5,hz:false}],
+      doors:[{x:3.45,y:0.8,w:0.8,hz:false},{x:4.45,y:4.0,w:0.7,hz:false},{x:2.0,y:3.45,w:0.8,hz:true}],
+      ent:{x:3.5,y:8.75,w:0.9,hz:true}
+    },
+    casa:{wm:10.0,hm:10.0,title:'Casa Pequena - ~100 m\u00B2',
+      rooms:[
+        {x:0,y:0,w:3.3,h:3.5,f:'#f2f0eb',n:'Habitacion 1'},
+        {x:3.3,y:0,w:3.4,h:3.5,f:'#f5f2ed',n:'Habitacion 2'},
+        {x:6.7,y:0,w:3.3,h:3.5,f:'#f3eef5',n:'Habitacion 3'},
+        {x:0,y:3.5,w:2.5,h:2.0,f:'#eaf2f5',n:'Bano 1',tc:'#3a6b8a'},
+        {x:2.5,y:3.5,w:2.5,h:2.0,f:'#eaf2f5',n:'Bano 2',tc:'#3a6b8a'},
+        {x:5.0,y:3.5,w:5.0,h:2.0,f:'#f7f6f3',n:'Pasillo',tc:'#999'},
+        {x:0,y:5.5,w:5.5,h:4.5,f:'#f5f3ec',n:'Sala - Comedor',tc:'#7a6830'},
+        {x:5.5,y:5.5,w:2.5,h:4.5,f:'#f5edec',n:'Cocina',tc:'#8a3a3a'},
+        {x:8.0,y:5.5,w:2.0,h:4.5,f:'#edf5ef',n:'Patio',tc:'#3a7a5a'}
+      ],
+      wins:[{x:0.5,y:0,w:1.0,hz:true},{x:4.0,y:0,w:1.0,hz:true},{x:7.5,y:0,w:1.0,hz:true},{x:0,y:7.0,w:1.5,hz:false}],
+      doors:[{x:3.25,y:0.8,w:0.8,hz:false},{x:6.65,y:0.8,w:0.8,hz:false},{x:1.0,y:3.45,w:0.7,hz:true},{x:3.5,y:3.45,w:0.7,hz:true}],
+      ent:{x:4.5,y:9.95,w:1.0,hz:true}
+    },
+    vacio:{wm:cwm||S.WM,hm:chm||S.HM,
+      title:(cwm||S.WM).toFixed(1)+'m x '+(chm||S.HM).toFixed(1)+'m',
+      rooms:[],wins:[],doors:[],ent:null},
+    custom:{wm:cwm||8.5,hm:chm||10.1,
+      title:(cwm||8.5).toFixed(1)+'m x '+(chm||10.1).toFixed(1)+'m',
+      rooms:[],wins:[],doors:[],ent:null}
+  };
+  const t=TPLS[id];if(!t)return;
+  const wm=t.wm,hm=t.hm;
+  S.WM=wm;S.HM=hm;
+  buildPlan();blocksG.innerHTML='';
+  calcGeometry(wm,hm);
+
+  const mpx=v=>S.OX+(v/wm)*S.WPx;
+  const mpy=v=>S.OY+(v/hm)*S.HPx;
+  const pw=v=>(v/wm)*S.WPx;
+  const ph=v=>(v/hm)*S.HPx;
+
+  blocksG.appendChild(mkLabel(400,45,t.title,22,'#2d3436'));
+  const bnd=ce('g');bnd.setAttribute('class','wall-block');bnd.setAttribute('data-type','boundary');bnd.setAttribute('data-name','Perimetro');
+  sPos(bnd,S.OX,S.OY);
+  const br=ce('rect');sa(br,{x:0,y:0,width:S.WPx,height:S.HPx,fill:'none',stroke:'#2d2d2d','stroke-width':'8',filter:'url(#planShd)'});
+  bnd.appendChild(br);blocksG.appendChild(bnd);
+
+  t.rooms.forEach(r=>{blocksG.appendChild(mkRoom(mpx(r.x),mpy(r.y),pw(r.w),ph(r.h),r.f,r.n,r.s||null,r.tc||'#4a4a4a'))});
+
+  (t.wins||[]).forEach(w=>{
+    if(w.hz)blocksG.appendChild(mkWindow(mpx(w.x),mpy(w.y)-4,pw(w.w),true));
+    else blocksG.appendChild(mkWindow(mpx(w.x)-4,mpy(w.y),ph(w.w),false));
+  });
+  (t.doors||[]).forEach(d=>{
+    if(d.hz)blocksG.appendChild(mkDoor(mpx(d.x),mpy(d.y),pw(d.w),true));
+    else blocksG.appendChild(mkDoor(mpx(d.x),mpy(d.y),ph(d.w),false));
+  });
+  if(t.ent){
+    const e=t.ent;
+    if(e.hz){
+      blocksG.appendChild(mkDoor(mpx(e.x),mpy(e.y)-5,pw(e.w),true));
+      blocksG.appendChild(mkLabel(mpx(e.x+e.w/2),mpy(e.y)+15,'ENTRADA',12,'#3a3a3a'));
+    }else{
+      blocksG.appendChild(mkDoor(mpx(e.x)-5,mpy(e.y),ph(e.w),false));
+      blocksG.appendChild(mkLabel(mpx(e.x)+15,mpy(e.y+e.w/2),'ENTRADA',12,'#3a3a3a'));
+    }
+  }
+
+  $('sw').value=S.WM;$('sh').value=S.HM;
+  fit();pushH();updScaleDisp();updAutoDims();S.currentProject=null;S.dirty=true;updProjIndicator();
+  toast('Plantilla creada','ok');
+}
+
+// ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
 function init(){
-  if(!loadSaved()){buildPlan()}
-  setup();fit();pushH();updScaleDisp();buildLib();buildColors();buildLayers();updAutoDims();
+  loadTheme();
+  // Migrate legacy data
+  const legacy=localStorage.getItem('plano-v4');
+  if(legacy&&getProjects().length===0){
+    try{
+      const ld=JSON.parse(legacy);
+      const entry={name:'Mi plano (migrado)',data:{blocks:ld.blocks,wm:ld.wm,hm:ld.hm,bgImg:ld.bgImg||null,bgOp:ld.bgOp||0.3},date:new Date().toISOString()};
+      localStorage.setItem(PROJ_KEY,JSON.stringify([entry]));
+      localStorage.removeItem('plano-v4');
+    }catch{}
+  }else if(legacy){
+    localStorage.removeItem('plano-v4');
+  }
+  // Load last project or show wizard
+  const projects=getProjects();
+  if(projects.length>0){
+    const latest=projects.sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    buildPlan();
+    loadProject(latest.name);
+  }else{
+    buildPlan();
+  }
+  setup();fit();if(S.hist.length===0)pushH();updScaleDisp();buildLib();buildColors();buildLayers();updAutoDims();updBgControls();
+  S.dirty=false;updProjIndicator();
+  setTimeout(drawRulers,100);
+  window.addEventListener('resize',()=>{drawRulers()});
+  checkFirstVisit();
+  if(projects.length===0)setTimeout(showWizard,400);
 }
 init();
 </script>

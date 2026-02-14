@@ -191,12 +191,136 @@ Cada mueble tiene forma SVG real (paths/ellipses/circles) en vez de solo rectang
 
 - **SVG**: Exporta el plano limpio (sin handles ni guias)
 - **PNG**: Exporta a 1600x2000px
+- **PDF**: Abre vista de impresion con escala configurable (1:50, 1:100), tabla de areas, y metadatos. Usar "Guardar como PDF" del navegador.
+
+### Restriccion de Movimiento
+
+Mantener **Shift** presionado mientras se arrastra un elemento restringe el movimiento a un solo eje (X o Y), el que tenga mayor desplazamiento. Util para alinear elementos con precision.
+
+### Estilo Visual Arquitectonico (v6)
+
+- Paredes gruesas y oscuras (#3a3a3a) con sombra proyectada
+- Colores de habitaciones suaves y calidos (paleta arquitectonica)
+- Patron de piso sutil (grilla de azulejos) en habitaciones
+- Perimetro con borde grueso (8px) y sombra exterior
+- Puertas y muros con aspecto profesional oscuro
+- Fondo calido off-white (#f0ede6)
+
+### Imagen de Fondo (v7)
+
+Importar una imagen (foto o scan de un plano existente) como fondo semitransparente para calcar encima:
+- Boton "Fondo" en la barra superior abre el selector de archivos
+- La imagen se posiciona dentro del area del plano (respetando aspect ratio)
+- Control de opacidad deslizable (5% a 100%) en el panel derecho
+- Boton para eliminar la imagen cuando ya no se necesita
+- Se persiste en guardado rapido y en proyectos
+
+### Multiples Proyectos (v7)
+
+Sistema de proyectos con nombre para gestionar distintos planos:
+- **Guardar**: Pide nombre y guarda el estado completo (bloques, escala, imagen de fondo)
+- **Proyectos**: Modal con lista de todos los proyectos guardados
+- Click en nombre para cargar, boton X para eliminar
+- Indicador visual del proyecto activo
+- Boton "Nuevo proyecto" para empezar desde cero
+- Almacenados en localStorage (`ap-projects`)
+
+### Botones de Alineacion (v7)
+
+Seccion "Alinear" aparece automaticamente al multi-seleccionar (2+ elementos):
+- **Alinear**: Izquierda, Centro H, Derecha, Arriba, Centro V, Abajo
+- **Distribuir**: Horizontal y Vertical (espacio igual entre elementos)
+
+### Pisos Contextuales (v7)
+
+Las habitaciones muestran patrones de piso automaticos segun su nombre:
+- **Bano**: Azulejos pequenos (`fBath`)
+- **Cocina**: Patron de tablero sutil (`fKitchen`)
+- **Habitacion/Sala/Dormitorio/Comedor**: Tablones de madera (`fWood`)
+- **Otros**: Grilla de azulejos generica (`ftile`)
+
+### Muebles Mejorados (v7)
+
+- **Cama**: Cabecera, almohadas, linea de sabana, pliegue de cobija
+- **Sofa**: Respaldo, brazos laterales, 3 cojines separados
+
+### Modo Claro/Oscuro (v7)
+
+Toggle en la esquina superior derecha (icono de luna). El modo claro usa:
+- Fondos claros (#f5f5f5, #fff), textos oscuros (#333)
+- Bordes suaves (#ddd), acentos azules (#3a7bf7)
+- Persistido en localStorage (`ap-theme`)
+
+### Reglas (Rulers) (v7)
+
+Reglas de medicion en los bordes del canvas:
+- **Horizontal**: Arriba del canvas, marcas cada 0.25m, etiquetas cada 1m
+- **Vertical**: Izquierda del canvas, etiquetas rotadas
+- Se actualizan con zoom/pan para reflejar metros reales
+- Toggle "Reglas" en la barra superior para ocultar/mostrar
+- Renderizadas con HTML5 Canvas para nitidez en cualquier DPI
+
+### Asistente de Nuevo Proyecto (v8)
+
+Boton "Nuevo" en la barra superior abre un wizard visual con:
+
+**Plantillas predefinidas (6 opciones):**
+
+| Plantilla       | Area    | Ambientes | Layout                                     |
+|---------------- |-------- |---------- |------------------------------------------- |
+| Estudio         | ~35 m²  | 4         | Sala/Dormitorio, Cocina, Bano, Lavadero    |
+| 1 Habitacion    | ~50 m²  | 5         | Dormitorio, Sala-Comedor, Cocina, Bano, Pasillo |
+| 2 Habitaciones  | ~70 m²  | 5         | 2 Dormitorios, Sala-Comedor, Bano, Cocina  |
+| 3 Habitaciones  | ~85 m²  | 9         | Layout original del plano base             |
+| Casa Pequena    | ~100 m² | 9         | 3 Hab, 2 Banos, Sala-Comedor, Cocina, Patio |
+| Lienzo Vacio    | Variable| 0         | Solo perimetro, sin divisiones internas    |
+
+Cada plantilla incluye habitaciones con colores, puertas, ventanas y puerta de entrada.
+
+**Lienzo personalizado:**
+- Inputs de ancho y alto en metros (2m a 30m)
+- Genera perimetro vacio con la escala configurada
+- Ideal para calcar sobre una imagen de fondo importada
+
+### Manual de Uso Integrado (v8)
+
+Boton "?" en la barra superior abre un manual interactivo con secciones colapsables (acordeon):
+
+- **Primeros Pasos** - Guia paso a paso para principiantes (6 pasos numerados)
+- **Herramientas** - Tabla con todas las herramientas, tecla de atajo y descripcion
+- **Atajos de Teclado** - Referencia completa de todos los atajos
+- **Panel Derecho** - Explicacion de cada seccion del panel (propiedades, capas, muebles, etc.)
+- **Proyectos y Exportacion** - Como guardar, cargar y exportar planos
+- **Funciones Especiales** - Snap, paredes inteligentes, rotacion, lasso, imagen de fondo, etc.
+
+Se muestra automaticamente la primera vez que un usuario abre la aplicacion. Despues solo se abre manualmente con el boton "?". Estado persistido en localStorage (`ap-help-seen`).
 
 ---
 
 ## Historial de Versiones
 
-### v5 (actual)
+### v8 (actual)
+- Asistente de nuevo proyecto con 6 plantillas visuales predefinidas
+- Lienzo personalizado con dimensiones a medida
+- Boton "Nuevo" en barra superior para acceso rapido
+- Manual de uso integrado con guia paso a paso y referencia de atajos
+- Auto-muestra en primera visita
+
+### v7
+- Importar imagen de fondo con control de opacidad para calcar planos
+- Multiples proyectos guardados con nombres (guardar/cargar/eliminar)
+- Botones de alineacion: izquierda, centro, derecha, arriba, abajo, distribuir
+- Pisos contextuales: patrones automaticos segun tipo de habitacion (bano, cocina, madera)
+- Muebles mejorados: cama con almohadas/cabecera, sofa con cojines
+- Modo claro/oscuro toggle con persistencia
+- Reglas (rulers) en bordes del canvas con medidas en metros
+
+### v6
+- Estilo visual arquitectonico: paredes gruesas oscuras, colores suaves, patrones de piso, sombras
+- Restriccion de movimiento con Shift (solo X o solo Y)
+- Exportacion a PDF con escala imprimible (1:50, 1:100) y tabla de areas
+
+### v5
 - Capas (layers) con toggles por tipo de elemento
 - Paredes inteligentes: redimensionar una habitacion ajusta las adyacentes
 - 10 nuevos muebles: silla, TV, escritorio, armario, mesa de noche, lavadora, bañera, escalera, columna, flecha norte
@@ -235,7 +359,7 @@ Cada mueble tiene forma SVG real (paths/ellipses/circles) en vez de solo rectang
 - [x] **Copy/Paste** (Ctrl+C/V)
 - [x] **Drag & drop** real desde la biblioteca de muebles
 - [x] **Edicion inline** - doble click en texto para editar sin modal
-- [ ] **Restriccion de movimiento** - Shift para mover solo en X o solo en Y
+- [x] **Restriccion de movimiento** - Shift para mover solo en X o solo en Y
 
 ### Prioridad Alta - Arquitectura
 
@@ -253,24 +377,24 @@ Cada mueble tiene forma SVG real (paths/ellipses/circles) en vez de solo rectang
 
 ### Prioridad Media - Exportacion
 
-- [ ] **Exportar a PDF** con escala imprimible (1:50, 1:100)
-- [ ] **Tabla de areas** - resumen de m2 por habitacion
-- [ ] **Multiples proyectos** guardados con nombres
-- [ ] **Importar imagen de fondo** para calcar encima de un plano real
+- [x] **Exportar a PDF** con escala imprimible (1:50, 1:100)
+- [x] **Tabla de areas** - resumen de m2 por habitacion
+- [x] **Multiples proyectos** guardados con nombres
+- [x] **Importar imagen de fondo** para calcar encima de un plano real
 
 ### Prioridad Baja - Visual/UX
 
-- [ ] **Modo claro/oscuro** toggle
+- [x] **Modo claro/oscuro** toggle
 - [ ] **Minimap** - vista miniatura para navegacion rapida
 - [ ] **Zoom a seleccion**
-- [ ] **Reglas** (rulers) en los bordes del canvas
+- [x] **Reglas** (rulers) en los bordes del canvas
 - [ ] **Guias personalizadas** arrastrables desde las reglas
 - [ ] **Pisos/Niveles** - tabs para planta baja, primer piso, etc.
 
 ### Prioridad Baja - Tecnico
 
 - [ ] **Touch support** - tablets con pinch-to-zoom
-- [ ] **Botones de alineacion** - alinear izquierda, centro, distribuir uniformemente
+- [x] **Botones de alineacion** - alinear izquierda, centro, distribuir uniformemente
 - [ ] **Historial visual** - timeline de cambios con preview
 - [ ] **Atajos configurables**
 - [ ] **Muebles favoritos/personalizados**
