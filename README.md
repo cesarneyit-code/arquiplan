@@ -1,21 +1,31 @@
-# ArquiPlan - Editor de Planos Interactivo
+# ArquiPlan - Editor de Planos Arquitectonicos 2D
 
-Editor visual de planos arquitectonicos para planificar remodelaciones de apartamentos. Aplicacion 100% client-side en un solo archivo HTML, sin dependencias externas.
+Editor visual de planos arquitectonicos en el navegador. Un solo archivo HTML, cero dependencias, 100% gratis.
+
+**[Usar ArquiPlan ahora](https://cesarneyit-code.github.io/arquiplan/)**
+
+---
+
+Este proyecto nacio para planificar la remodelacion de mi apartamento. Lo comparto por si le sirve a alguien mas — ya sea para remodelar, disenar un espacio nuevo, o simplemente jugar con distribuciones de planta. Usalo como quieras.
+
+Construido enteramente con [Claude Code](https://claude.ai/claude-code) (Anthropic).
 
 ## Inicio Rapido
 
-```bash
-open plano-editor.html
-```
+Puedes usarlo de dos formas:
 
-Solo abrir el archivo en cualquier navegador moderno (Chrome, Firefox, Safari, Edge).
+1. **Online**: Abre [cesarneyit-code.github.io/arquiplan](https://cesarneyit-code.github.io/arquiplan/) y listo
+2. **Local**: Descarga `index.html` y abrelo en cualquier navegador moderno
+
+No requiere instalacion, servidor, ni conexion a internet (en modo local).
 
 ## Estructura del Proyecto
 
 ```
 arquiplan/
-  plano-editor.html      # Aplicacion completa (HTML + CSS + JS)
+  index.html              # Aplicacion completa (HTML + CSS + JS)
   plano-original.xml      # Plano SVG fuente del apartamento (85.85 m2)
+  AI-REFERENCE.md         # Referencia tecnica para generar planos con IA
   README.md               # Este archivo
 ```
 
@@ -429,3 +439,13 @@ Elementos adicionales: 1 muro closet, 4 ventanas, 1 puerta entrada, 1 isla de co
 - **Wall Snap**: Puertas y ventanas detectan bordes de habitaciones cercanas (15px) y se adhieren.
 - **Rendimiento**: Para planos grandes considerar virtualizar la grilla y limitar snap a elementos cercanos.
 - **Navegador**: Probado en Chrome/Safari. Requiere ES6+.
+
+---
+
+## Licencia
+
+MIT License. Usa, modifica, distribuye como quieras. Ver [LICENSE](LICENSE).
+
+---
+
+Hecho con [Claude Code](https://claude.ai/claude-code) por [@cesarneyit-code](https://github.com/cesarneyit-code)
